@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0-create-tables
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.0-create-tables.sql
+
+
+  - changeSet:
+      id: 1.1-insert-data
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.1-insert-data.sql
