@@ -115,7 +115,7 @@ public class RentalServiceImpl implements RentalService {
     }
 
 
-    //Надо переработать
+    //Надо переработать(пока что рассчитывает неправильно)
     private BigDecimal calculateTotalPrice(Rental rental) {
         Duration duration = Duration.between(rental.getStartTime(), rental.getEndTime());
         BigDecimal hours = BigDecimal.valueOf(duration.toMinutes()).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);

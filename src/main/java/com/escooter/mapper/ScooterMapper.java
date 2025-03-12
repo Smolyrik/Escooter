@@ -1,10 +1,7 @@
 package com.escooter.mapper;
 
 import com.escooter.dto.ScooterDto;
-import com.escooter.entity.Model;
-import com.escooter.entity.RentalPoint;
-import com.escooter.entity.Scooter;
-import com.escooter.entity.ScooterStatus;
+import com.escooter.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -17,11 +14,13 @@ public interface ScooterMapper {
     @Mapping(source = "rentalPoint.id", target = "rentalPointId")
     @Mapping(source = "model.id", target = "modelId")
     @Mapping(source = "status.id", target = "statusId")
+    @Mapping(source = "pricingPlan.id", target = "pricingPlanId")
     ScooterDto toDto(Scooter scooter);
 
     @Mapping(source = "rentalPointId", target = "rentalPoint", qualifiedByName = "rentalPointFromId")
     @Mapping(source = "modelId", target = "model", qualifiedByName = "modelFromId")
     @Mapping(source = "statusId", target = "status", qualifiedByName = "statusFromId")
+    @Mapping(source = "pricingPlanId", target = "pricingPlan", qualifiedByName = "pricingPlanFromId")
     Scooter toEntity(ScooterDto scooterDto);
 
     @Named("rentalPointFromId")
@@ -51,6 +50,16 @@ public interface ScooterMapper {
         }
         return ScooterStatus.builder()
                 .id(statusId)
+                .build();
+    }
+
+    @Named("pricingPlanFromId")
+    default PricingPlan pricingPlanFromId(UUID pricingPlanId){
+        if(pricingPlanId == null){
+            return null;
+        }
+        return PricingPlan.builder()
+                .id(pricingPlanId)
                 .build();
     }
 }

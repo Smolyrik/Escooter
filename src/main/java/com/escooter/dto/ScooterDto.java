@@ -30,6 +30,9 @@ public class ScooterDto {
     @Max(100)
     private BigDecimal batteryLevel;
 
+    @NotNull(message = "Pricing plan id must not be null")
+    private UUID pricingPlanId;
+
     @NotNull(message = "Status id must not be null")
     private Integer statusId;
 
