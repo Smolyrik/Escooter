@@ -13,3 +13,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/sql/1.1-insert-data.sql
+
+  - changeSet:
+      id: 1.2-change-report-column
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.2-change-report-column.sql

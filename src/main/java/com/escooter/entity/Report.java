@@ -24,7 +24,7 @@ public class Report {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "data", nullable = false, columnDefinition = "JSON")
+    @Column(name = "data", nullable = false)
     private String data;
 }
 
