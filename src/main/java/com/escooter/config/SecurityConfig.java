@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -51,11 +52,22 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/*.html", "/css/**", "/js/**").permitAll()
+
                         .requestMatchers("/api/models/**").hasRole("MANAGER")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/**").authenticated()
+                        .requestMatchers("/api/pricing-plans/**").hasRole("MANAGER")
+                        .requestMatchers("/api/scooters/**").hasRole("MANAGER")
+                        .requestMatchers("/rental-points/**").hasRole("MANAGER")
+                        .requestMatchers("/api/reports/**").hasRole("MANAGER")
+                        .requestMatchers("/api/users/**").hasRole("MANAGER")
+
+                        .requestMatchers("/rentals/**").hasRole("USER")
+                        .requestMatchers("/api/payments/**").hasRole("USER")
+                        .requestMatchers("/api/users/{userId}").hasRole("USER")
+
+                        .requestMatchers(HttpMethod.GET, "/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
