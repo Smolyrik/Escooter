@@ -1,4 +1,4 @@
-package com.escooter.IT;
+package com.escooter.IT.service;
 
 import com.escooter.dto.RentalPointDto;
 import com.escooter.dto.ScooterDto;

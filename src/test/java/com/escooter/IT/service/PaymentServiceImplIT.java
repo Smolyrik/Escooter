@@ -1,4 +1,4 @@
-package com.escooter.IT;
+package com.escooter.IT.service;
 
 import com.escooter.dto.PaymentDto;
 import com.escooter.dto.PaymentStatusDto;
@@ -81,8 +81,8 @@ class PaymentServiceImplIT {
                 .balance(new BigDecimal("200.00"))
                 .build());
 
-        pendingStatus = paymentStatusRepository.save(new PaymentStatus(null, "Pending"));
-        completedStatus = paymentStatusRepository.save(new PaymentStatus(null, "Completed"));
+        pendingStatus = paymentStatusRepository.save(new PaymentStatus(null, "PENDING"));
+        completedStatus = paymentStatusRepository.save(new PaymentStatus(null, "COMPLETED"));
     }
 
     @AfterEach
@@ -120,7 +120,7 @@ class PaymentServiceImplIT {
     void testUpdatePaymentStatus() {
         PaymentDto payment = paymentService.makePayment(testUser.getId(), new BigDecimal("40.00"));
 
-        PaymentStatusDto newStatus = new PaymentStatusDto(completedStatus.getId(), "Completed");
+        PaymentStatusDto newStatus = new PaymentStatusDto(completedStatus.getId(), "COMPLETED");
 
         PaymentDto updatedPayment = paymentService.updatePaymentStatus(payment.getId(), newStatus);
 

@@ -77,7 +77,7 @@ class PaymentServiceImplTest {
     @Test
     void makePayment_ShouldReturnPaymentDto() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(payment.getUser()));
-        when(paymentStatusRepository.findByName("Pending")).thenReturn(Optional.of(payment.getStatus()));
+        when(paymentStatusRepository.findByName("PENDING")).thenReturn(Optional.of(payment.getStatus()));
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(paymentMapper.toDto(payment)).thenReturn(paymentDto);
 

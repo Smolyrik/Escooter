@@ -1,4 +1,4 @@
-package com.escooter.IT;
+package com.escooter.IT.service;
 
 import com.escooter.dto.RentalDto;
 import com.escooter.entity.*;
@@ -98,11 +98,11 @@ class RentalServiceImplIT {
 
         PricingPlan testPlan = new PricingPlan(null, "Basic", new BigDecimal("10.00"), new BigDecimal("100.00"), new BigDecimal("5.00"));
 
-        ScooterStatus availableStatus = scooterStatusRepository.save(new ScooterStatus(null, "Available"));
-        scooterStatusRepository.save(new ScooterStatus(null, "Rented"));
+        ScooterStatus availableStatus = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
+        scooterStatusRepository.save(new ScooterStatus(null, "RENTED"));
 
-        rentalStatusRepository.save(new RentalStatus(null, "Active"));
-        rentalStatusRepository.save(new RentalStatus(null, "Completed"));
+        rentalStatusRepository.save(new RentalStatus(null, "ACTIVE"));
+        rentalStatusRepository.save(new RentalStatus(null, "COMPLETED"));
 
         testScooter = scooterRepository.save(Scooter.builder()
                 .model(modelRepository.save(new Model(null, "Test Model")))

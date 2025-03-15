@@ -16,13 +16,13 @@ public interface ScooterRepository extends JpaRepository<Scooter, UUID> {
 
     List<Scooter> findByRentalPointId(UUID rentalPointId);
 
-    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'Rented'")
+    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'RENTED'")
     List<Scooter> getRentedScootersByRentalPointId(@Param("rentalPointId") UUID rentalPointId);
 
-    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'Available'")
+    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'AVAILABLE'")
     List<Scooter> getAvailableScootersByRentalPointId(@Param("rentalPointId") UUID rentalPointId);
 
-    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'In Repair'")
+    @Query("SELECT s FROM Scooter s WHERE s.rentalPoint.id = :rentalPointId AND s.status.name = 'IN REPAIR'")
     List<Scooter> getInRepairScootersByRentalPointId(@Param("rentalPointId") UUID rentalPointId);
 
 

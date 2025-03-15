@@ -41,15 +41,15 @@ public class RentalServiceImpl implements RentalService {
         Scooter scooter = scooterRepository.findById(scooterId)
                 .orElseThrow(() -> new NoSuchElementException("Scooter with ID: " + scooterId + " not found"));
 
-        boolean isScooterAvailable = scooterRepository.existsByIdAndStatus_Name(scooter.getId(), "Available");
+        boolean isScooterAvailable = scooterRepository.existsByIdAndStatus_Name(scooter.getId(), "AVAILABLE");
         if (!isScooterAvailable) {
             throw new IllegalStateException("Scooter with ID: " + scooterId + " is already rented");
         }
 
-        ScooterStatus scooterStatus = scooterStatusRepository.findByName("Rented")
+        ScooterStatus scooterStatus = scooterStatusRepository.findByName("RENTED")
                 .orElseThrow(() -> new NoSuchElementException("Scooter status 'Rented' not found"));
 
-        RentalStatus activeStatus = rentalStatusRepository.findByName("Active")
+        RentalStatus activeStatus = rentalStatusRepository.findByName("ACTIVE")
                 .orElseThrow(() -> new NoSuchElementException("Rental status 'Active' not found"));
 
         Rental rental = Rental.builder()
@@ -81,10 +81,10 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new NoSuchElementException("Rental with ID: " + rentalId + " not found"));
 
-        RentalStatus activeStatus = rentalStatusRepository.findByName("Completed")
+        RentalStatus activeStatus = rentalStatusRepository.findByName("COMPLETED")
                 .orElseThrow(() -> new NoSuchElementException("Rental status 'Completed' not found"));
 
-        ScooterStatus availableStatus = scooterStatusRepository.findByName("Available")
+        ScooterStatus availableStatus = scooterStatusRepository.findByName("AVAILABLE")
                 .orElseThrow(() -> new NoSuchElementException("Scooter status 'Available' not found"));
 
         rental.setEndTime(LocalDateTime.now());

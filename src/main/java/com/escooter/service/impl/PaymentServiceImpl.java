@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
                     return new NoSuchElementException("User with ID: " + userId + " not found");
                 });
 
-        PaymentStatus status = paymentStatusRepository.findByName("Pending")
+        PaymentStatus status = paymentStatusRepository.findByName("PENDING")
                 .orElseThrow(() -> {
                     log.error("Payment status not found");
                     return new NoSuchElementException("Payment status not found");

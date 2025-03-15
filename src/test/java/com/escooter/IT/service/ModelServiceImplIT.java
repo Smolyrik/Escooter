@@ -1,4 +1,4 @@
-package com.escooter.IT;
+package com.escooter.IT.service;
 
 import com.escooter.dto.ModelDto;
 import com.escooter.entity.Model;

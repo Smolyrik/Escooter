@@ -89,9 +89,9 @@ class RentalServiceImplTest {
     void rentScooter_ShouldReturnRentalDto() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(scooterRepository.findById(scooterId)).thenReturn(Optional.of(scooter));
-        when(scooterRepository.existsByIdAndStatus_Name(scooterId, "Available")).thenReturn(true);
-        when(scooterStatusRepository.findByName("Rented")).thenReturn(Optional.of(new ScooterStatus()));
-        when(rentalStatusRepository.findByName("Active")).thenReturn(Optional.of(new RentalStatus()));
+        when(scooterRepository.existsByIdAndStatus_Name(scooterId, "AVAILABLE")).thenReturn(true);
+        when(scooterStatusRepository.findByName("RENTED")).thenReturn(Optional.of(new ScooterStatus()));
+        when(rentalStatusRepository.findByName("ACTIVE")).thenReturn(Optional.of(new RentalStatus()));
         when(rentalRepository.save(any(Rental.class))).thenReturn(rental);
         when(rentalMapper.toDto(rental)).thenReturn(rentalDto);
 
@@ -122,7 +122,7 @@ class RentalServiceImplTest {
     void rentScooter_ShouldThrowException_WhenScooterAlreadyRented() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(scooterRepository.findById(scooterId)).thenReturn(Optional.of(scooter));
-        when(scooterRepository.existsByIdAndStatus_Name(scooterId, "Available")).thenReturn(false);
+        when(scooterRepository.existsByIdAndStatus_Name(scooterId, "AVAILABLE")).thenReturn(false);
 
         assertThrows(IllegalStateException.class, () -> rentalService.rentScooter(userId, scooterId));
     }
@@ -130,8 +130,8 @@ class RentalServiceImplTest {
     @Test
     void endRental_ShouldReturnUpdatedRentalDto() {
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
-        when(rentalStatusRepository.findByName("Completed")).thenReturn(Optional.of(new RentalStatus()));
-        when(scooterStatusRepository.findByName("Available")).thenReturn(Optional.of(new ScooterStatus()));
+        when(rentalStatusRepository.findByName("COMPLETED")).thenReturn(Optional.of(new RentalStatus()));
+        when(scooterStatusRepository.findByName("AVAILABLE")).thenReturn(Optional.of(new ScooterStatus()));
         when(rentalRepository.save(any(Rental.class))).thenReturn(rental);
         when(rentalMapper.toDto(rental)).thenReturn(rentalDto);
 
