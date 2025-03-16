@@ -54,7 +54,10 @@ class PaymentServiceImplTest {
     void setUp() {
         paymentId = UUID.randomUUID();
         userId = UUID.randomUUID();
-        User user = User.builder().id(userId).build();
+        User user = User.builder()
+                .id(userId)
+                .balance(new BigDecimal("100"))
+                .build();
         PaymentStatus status = PaymentStatus.builder().id(1).name("Pending").build();
 
         payment = Payment.builder()
@@ -77,7 +80,7 @@ class PaymentServiceImplTest {
     @Test
     void makePayment_ShouldReturnPaymentDto() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(payment.getUser()));
-        when(paymentStatusRepository.findByName("PENDING")).thenReturn(Optional.of(payment.getStatus()));
+        when(paymentStatusRepository.findByName("COMPLETED")).thenReturn(Optional.of(payment.getStatus()));
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(paymentMapper.toDto(payment)).thenReturn(paymentDto);
 

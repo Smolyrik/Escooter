@@ -39,17 +39,14 @@ class RentalServiceImplIT {
     private RentalPointRepository rentalPointRepository;
     @Autowired
     private PricingPlanRepository pricingPlanRepository;
+    @Autowired
+    private RentalTypeRepository rentalTypeRepository;
 
     @BeforeAll
     static void setup() {
         System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
         System.setProperty("spring.datasource.username", postgres.getUsername());
         System.setProperty("spring.datasource.password", postgres.getPassword());
-    }
-
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
     }
 
     @Autowired
@@ -75,10 +72,12 @@ class RentalServiceImplIT {
 
     private User testUser;
     private Scooter testScooter;
+    private RentalType testRentalType;
 
     @BeforeEach
     void setUp() {
-        Role testRole = roleRepository.save(new Role(null, "User"));
+        Role testRole = roleRepository.findByName("USER")
+                .orElse(new Role(null, "USER"));
         testUser = userRepository.save(User.builder()
                 .role(testRole)
                 .name("Test User")
@@ -98,11 +97,8 @@ class RentalServiceImplIT {
 
         PricingPlan testPlan = new PricingPlan(null, "Basic", new BigDecimal("10.00"), new BigDecimal("100.00"), new BigDecimal("5.00"));
 
-        ScooterStatus availableStatus = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
-        scooterStatusRepository.save(new ScooterStatus(null, "RENTED"));
-
-        rentalStatusRepository.save(new RentalStatus(null, "ACTIVE"));
-        rentalStatusRepository.save(new RentalStatus(null, "COMPLETED"));
+        ScooterStatus availableStatus = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
 
         testScooter = scooterRepository.save(Scooter.builder()
                 .model(modelRepository.save(new Model(null, "Test Model")))
@@ -112,6 +108,9 @@ class RentalServiceImplIT {
                 .batteryLevel(new BigDecimal("80.00"))
                 .mileage(new BigDecimal("100.00"))
                 .build());
+
+        testRentalType = rentalTypeRepository.findByName("HOURLY")
+                .orElse(new RentalType(null, "HOURLY"));
     }
 
     @AfterEach
@@ -133,21 +132,11 @@ class RentalServiceImplIT {
 
         userRepository.deleteAll();
         userRepository.flush();
-
-        rentalStatusRepository.deleteAll();
-        rentalStatusRepository.flush();
-
-        scooterStatusRepository.deleteAll();
-        scooterStatusRepository.flush();
-
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test
     void testRentScooter() {
-        RentalDto rentalDto = rentalService.rentScooter(testUser.getId(), testScooter.getId());
-
+        RentalDto rentalDto = rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
         assertThat(rentalDto).isNotNull();
         assertThat(rentalDto.getUserId()).isEqualTo(testUser.getId());
         assertThat(rentalDto.getScooterId()).isEqualTo(testScooter.getId());
@@ -155,10 +144,19 @@ class RentalServiceImplIT {
     }
 
     @Test
-    void testEndRental() {
-        RentalDto rentalDto = rentalService.rentScooter(testUser.getId(), testScooter.getId());
-        RentalDto endedRental = rentalService.endRental(rentalDto.getId());
+    void testRentScooterWithNegativeBalance() {
+        testUser.setBalance(new BigDecimal("-10.00"));
+        userRepository.save(testUser);
 
+        assertThatThrownBy(() -> rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("has a negative balance and cannot rent a scooter");
+    }
+
+    @Test
+    void testEndRental() {
+        RentalDto rentalDto = rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
+        RentalDto endedRental = rentalService.endRental(rentalDto.getId());
         assertThat(endedRental).isNotNull();
         assertThat(endedRental.getEndTime()).isNotNull();
         assertThat(endedRental.getTotalPrice()).isNotNull();
@@ -166,7 +164,7 @@ class RentalServiceImplIT {
 
     @Test
     void testGetAllRentals() {
-        rentalService.rentScooter(testUser.getId(), testScooter.getId());
+        rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
         List<RentalDto> rentals = rentalService.getAllRentals();
 
         assertThat(rentals).isNotEmpty();
@@ -174,7 +172,7 @@ class RentalServiceImplIT {
 
     @Test
     void testGetRentalsByUserId() {
-        rentalService.rentScooter(testUser.getId(), testScooter.getId());
+        rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
         List<RentalDto> rentals = rentalService.getRentalsByUserId(testUser.getId());
 
         assertThat(rentals).isNotEmpty();
@@ -182,7 +180,7 @@ class RentalServiceImplIT {
 
     @Test
     void testGetRentalsByScooterId() {
-        rentalService.rentScooter(testUser.getId(), testScooter.getId());
+        rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
         List<RentalDto> rentals = rentalService.getRentalsByScooterId(testScooter.getId());
 
         assertThat(rentals).isNotEmpty();
@@ -190,9 +188,9 @@ class RentalServiceImplIT {
 
     @Test
     void testRentScooterWhenAlreadyRented() {
-        rentalService.rentScooter(testUser.getId(), testScooter.getId());
+        rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
 
-        assertThatThrownBy(() -> rentalService.rentScooter(testUser.getId(), testScooter.getId()))
+        assertThatThrownBy(() -> rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("is already rented");
     }

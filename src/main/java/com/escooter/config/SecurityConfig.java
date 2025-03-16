@@ -56,12 +56,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/models/**").hasRole("MANAGER")
                         .requestMatchers("/api/pricing-plans/**").hasRole("MANAGER")
                         .requestMatchers("/api/scooters/**").hasRole("MANAGER")
-                        .requestMatchers("/rental-points/**").hasRole("MANAGER")
+                        .requestMatchers("/api/rental-points/**").hasRole("MANAGER")
                         .requestMatchers("/api/reports/**").hasRole("MANAGER")
                         .requestMatchers("/api/users/**").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/rentals").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/rentals/scooter/**").hasRole("MANAGER")
 
-                        .requestMatchers("/rentals/**").hasRole("USER")
-                        .requestMatchers("/api/payments/**").hasRole("USER")
+                        .requestMatchers("/api/rentals/start").hasAnyRole("USER", "MANAGER")
+                        .requestMatchers("/api/rentals/end").hasAnyRole("USER", "MANAGER")
+                        .requestMatchers("/api/rentals/user/**").hasAnyRole("USER", "MANAGER")
+                        .requestMatchers("/api/payments/**").hasAnyRole("USER", "MANAGER")
+
                         .requestMatchers("/api/users/{userId}").hasRole("USER")
 
                         .requestMatchers(HttpMethod.GET, "/**").authenticated()

@@ -64,10 +64,11 @@ class RentalPointControllerIT {
 
     @BeforeEach
     void setUp() {
-        String baseUrl = "http://localhost:" + port + "/rental-points";
+        String baseUrl = "http://localhost:" + port + "/api/rental-points";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        Role testRole = roleRepository.save(new Role(null, "MANAGER"));
+        Role testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         testUser = userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
     }
 
@@ -75,18 +76,18 @@ class RentalPointControllerIT {
     void cleanUp() {
         scooterRepository.deleteAll();
         scooterRepository.flush();
+
         pricingPlanRepository.deleteAll();
         pricingPlanRepository.flush();
+
         modelRepository.deleteAll();
         modelRepository.flush();
+
         rentalPointRepository.deleteAll();
         rentalPointRepository.flush();
+
         userRepository.deleteAll();
         userRepository.flush();
-        scooterStatusRepository.deleteAll();
-        scooterStatusRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test
@@ -180,7 +181,8 @@ class RentalPointControllerIT {
         );
         Model model = modelRepository.save(new Model(null, "Test Model"));
         PricingPlan pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Basic Plan", new BigDecimal("5.00"), new BigDecimal("50.00"), new BigDecimal("10.00")));
-        ScooterStatus available = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
+        ScooterStatus available = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
         scooterRepository.save(new Scooter(null, rentalPoint, model, pricingPlan, new BigDecimal(100), available, new BigDecimal(100)));
 
         ScooterDto[] response = webClient.get()
@@ -201,7 +203,8 @@ class RentalPointControllerIT {
         );
         Model model = modelRepository.save(new Model(null, "Model X"));
         PricingPlan pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Standard", new BigDecimal("5.00"), new BigDecimal("50.00"), new BigDecimal("10.00")));
-        ScooterStatus available = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
+        ScooterStatus available = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
         scooterRepository.save(new Scooter(null, rentalPoint, model, pricingPlan, new BigDecimal(100), available, new BigDecimal(100)));
 
         ScooterDto[] response = webClient.get()
@@ -220,7 +223,8 @@ class RentalPointControllerIT {
         RentalPoint rentalPoint = rentalPointRepository.save(new RentalPoint(null, "Rented Scooters", new BigDecimal("40.7306"), new BigDecimal("-73.9352"), "NYC", testUser));
         Model model = modelRepository.save(new Model(null, "Model Y"));
         PricingPlan pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Premium", new BigDecimal("10.00"), new BigDecimal("100.00"), new BigDecimal("20.00")));
-        ScooterStatus rented = scooterStatusRepository.save(new ScooterStatus(null, "RENTED"));
+        ScooterStatus rented = scooterStatusRepository.findByName("RENTED")
+                .orElse(new ScooterStatus(null, "RENTED"));
         scooterRepository.save(new Scooter(null, rentalPoint, model, pricingPlan, new BigDecimal(100), rented, new BigDecimal(100)));
 
         ScooterDto[] response = webClient.get()
@@ -239,7 +243,8 @@ class RentalPointControllerIT {
         RentalPoint rentalPoint = rentalPointRepository.save(new RentalPoint(null, "Repair Station", new BigDecimal("40.7306"), new BigDecimal("-73.9352"), "NYC", testUser));
         Model model = modelRepository.save(new Model(null, "Model Z"));
         PricingPlan pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Deluxe", new BigDecimal("15.00"), new BigDecimal("150.00"), new BigDecimal("30.00")));
-        ScooterStatus inRepair = scooterStatusRepository.save(new ScooterStatus(null, "IN REPAIR"));
+        ScooterStatus inRepair = scooterStatusRepository.findByName("IN REPAIR")
+                .orElse(new ScooterStatus(null, "IN REPAIR"));
         scooterRepository.save(new Scooter(null, rentalPoint, model, pricingPlan, new BigDecimal(100), inRepair, new BigDecimal(100)));
 
         ScooterDto[] response = webClient.get()

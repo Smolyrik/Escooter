@@ -29,12 +29,14 @@ class RentalControllerTest {
     private UUID rentalId;
     private UUID userId;
     private UUID scooterId;
+    private Integer rentalTypeId;
 
     @BeforeEach
     void setUp() {
         rentalId = UUID.randomUUID();
         userId = UUID.randomUUID();
         scooterId = UUID.randomUUID();
+        rentalTypeId = 1;
         rentalDto = RentalDto.builder()
                 .id(rentalId)
                 .userId(userId)
@@ -44,13 +46,13 @@ class RentalControllerTest {
 
     @Test
     void rentScooter_ShouldReturnRentalDto() {
-        when(rentalService.rentScooter(userId, scooterId)).thenReturn(rentalDto);
+        when(rentalService.rentScooter(userId, scooterId, rentalTypeId)).thenReturn(rentalDto);
 
-        ResponseEntity<RentalDto> response = rentalController.rentScooter(userId, scooterId);
+        ResponseEntity<RentalDto> response = rentalController.rentScooter(userId, scooterId, rentalTypeId);
 
         assertNotNull(response.getBody());
         assertEquals(rentalId, response.getBody().getId());
-        verify(rentalService, times(1)).rentScooter(userId, scooterId);
+        verify(rentalService, times(1)).rentScooter(userId, scooterId, rentalTypeId);
     }
 
     @Test

@@ -47,11 +47,6 @@ class RentalPointServiceImplIT {
         System.setProperty("spring.datasource.password", postgres.getPassword());
     }
 
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
-    }
-
     @Autowired
     private RentalPointService rentalPointService;
 
@@ -71,7 +66,8 @@ class RentalPointServiceImplIT {
 
     @BeforeEach
     void setUp() {
-        Role testRole = roleRepository.save(new Role(null, "User"));
+        Role testRole = roleRepository.findByName("USER")
+                .orElse(new Role(null, "USER"));
         testManager = userRepository.save(User.builder()
                 .role(testRole)
                 .name("Manager")
@@ -85,9 +81,13 @@ class RentalPointServiceImplIT {
     @AfterEach
     void cleanUp() {
         scooterRepository.deleteAll();
+        scooterRepository.flush();
+
         rentalPointRepository.deleteAll();
+        rentalPointRepository.flush();
+
         userRepository.deleteAll();
-        roleRepository.deleteAll();
+        userRepository.flush();
     }
 
     @Nested

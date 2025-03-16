@@ -69,30 +69,32 @@ class ScooterControllerIT {
         String baseUrl = "http://localhost:" + port + "/api/scooters";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        Role testRole = roleRepository.save(new Role(null, "MANAGER"));
+        Role testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         User testUser = userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
         rentalPoint = rentalPointRepository.save(new RentalPoint(null, "Central Station", new BigDecimal("40.7128"), new BigDecimal("-74.0060"), "NYC", testUser));
         model = modelRepository.save(new Model(null, "Test Model"));
         pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Basic Plan", new BigDecimal("5.00"), new BigDecimal("50.00"), new BigDecimal("10.00")));
-        scooterStatus = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
+        scooterStatus = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
     }
 
     @AfterEach
     void cleanUp() {
         scooterRepository.deleteAll();
         scooterRepository.flush();
+
         rentalPointRepository.deleteAll();
         rentalPointRepository.flush();
+
         userRepository.deleteAll();
         userRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
+
         modelRepository.deleteAll();
         modelRepository.flush();
+
         pricingPlanRepository.deleteAll();
         pricingPlanRepository.flush();
-        scooterStatusRepository.deleteAll();
-        scooterStatusRepository.flush();
     }
 
     @Test

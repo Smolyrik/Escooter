@@ -26,7 +26,11 @@ public class RentalDto {
     @NotNull(message = "Scooter id must not be null")
     private UUID scooterId;
 
+    @NotNull(message = "Status id must not be null")
     private Integer statusId;
+
+    @NotNull(message = "Rental type id must not be null")
+    private Integer rentalTypeId;
 
     @NotNull(message = "Start time must not be null")
     private LocalDateTime startTime;

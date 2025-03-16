@@ -63,11 +63,11 @@ class PaymentControllerIT {
         String baseUrl = "http://localhost:" + port + "/api/payments";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        Role testRole = roleRepository.save(new Role(null, "MANAGER"));
+        Role testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         testUser = userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
-        pendingStatus = paymentStatusRepository.save(new PaymentStatus(null, "PENDING"));
-        paymentStatusRepository.save(new PaymentStatus(null, "COMPLETED"));
-        paymentStatusRepository.save(new PaymentStatus(null, "FAILED"));
+        pendingStatus = paymentStatusRepository.findByName("PENDING")
+                .orElse(new PaymentStatus(null, "PENDING"));
     }
 
     @AfterEach
@@ -76,10 +76,6 @@ class PaymentControllerIT {
         paymentRepository.flush();
         userRepository.deleteAll();
         userRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
-        paymentStatusRepository.deleteAll();
-        paymentStatusRepository.flush();
     }
 
     @Test
@@ -138,7 +134,7 @@ class PaymentControllerIT {
 
         return Jwts.builder()
                 .subject("test@example.com")
-                .claim("authorities", List.of("MANAGER"))
+                .claim("authorities", List.of("USER"))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 3600000))
                 .signWith(key)

@@ -41,11 +41,6 @@ class PricingPlanServiceImplIT {
         System.setProperty("spring.datasource.password", postgres.getPassword());
     }
 
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
-    }
-
     @Autowired
     private PricingPlanService pricingPlanService;
 

@@ -53,7 +53,8 @@ class UserControllerIT {
         String baseUrl = "http://localhost:" + port + "/api/users";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        testRole = roleRepository.save(new Role(null, "MANAGER"));
+        testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
     }
 
@@ -61,8 +62,6 @@ class UserControllerIT {
     void cleanUp() {
         userRepository.deleteAll();
         userRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test

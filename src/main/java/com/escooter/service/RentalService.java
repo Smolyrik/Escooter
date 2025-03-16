@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface RentalService {
 
-    RentalDto rentScooter(UUID userId, UUID scooterId);
+    RentalDto rentScooter(UUID userId, UUID scooterId, Integer rentalType);
 
     List<RentalDto> getAllRentals();
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/rental-points")
+@RequestMapping("/api/rental-points")
 @RequiredArgsConstructor
 public class RentalPointController {
 

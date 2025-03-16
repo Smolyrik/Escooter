@@ -1,8 +1,6 @@
 package com.escooter.security;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
@@ -16,6 +14,11 @@ public class SignUpRequest {
     @NotBlank(message = "Email address cannot be empty")
     @Email(message = "Email must be in the format user@example.com")
     private String email;
+
+    @NotNull(message = "Phone number cannot be null")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$",
+            message = "Phone number must be in a valid format (e.g., +1234567890)")
+    private String phone;
 
     @Size(max = 255, message = "Password length must be no more than 255 characters")
     private String password;

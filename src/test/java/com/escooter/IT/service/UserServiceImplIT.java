@@ -43,11 +43,6 @@ class UserServiceImplIT {
         System.setProperty("spring.datasource.password", postgres.getPassword());
     }
 
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
-    }
-
     @Autowired
     private UserService userService;
 
@@ -61,15 +56,14 @@ class UserServiceImplIT {
 
     @BeforeEach
     void setUp() {
-        testRole = roleRepository.save(new Role(null, "User"));
+        testRole = roleRepository.findByName("USER")
+                .orElse(new Role(null, "USER"));
     }
 
     @AfterEach
     void cleanUp() {
         userRepository.deleteAll();
         userRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test

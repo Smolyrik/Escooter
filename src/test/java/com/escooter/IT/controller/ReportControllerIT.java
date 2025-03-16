@@ -57,7 +57,8 @@ class ReportControllerIT {
         String baseUrl = "http://localhost:" + port + "/api/reports";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        Role testRole = roleRepository.save(new Role(null, "MANAGER"));
+        Role testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
     }
 
@@ -67,8 +68,6 @@ class ReportControllerIT {
         reportRepository.flush();
         userRepository.deleteAll();
         userRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test

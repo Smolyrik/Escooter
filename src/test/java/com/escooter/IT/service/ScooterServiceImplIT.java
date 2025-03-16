@@ -38,11 +38,6 @@ class ScooterServiceImplIT {
         System.setProperty("spring.datasource.password", postgres.getPassword());
     }
 
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
-    }
-
     @Autowired
     private ScooterServiceImpl scooterService;
     @Autowired
@@ -67,7 +62,8 @@ class ScooterServiceImplIT {
 
     @BeforeEach
     void setUp() {
-        Role testRole = roleRepository.save(new Role(null, "User"));
+        Role testRole = roleRepository.findByName("USER")
+                .orElse(new Role(null, "USER"));
         User user = userRepository.save(User.builder()
                 .role(testRole)
                 .name("Alice")
@@ -79,7 +75,8 @@ class ScooterServiceImplIT {
         rentalPoint = rentalPointRepository.save(new RentalPoint(null, "Central Point", BigDecimal.ZERO, BigDecimal.ZERO, "123 Main St", user));
         model = modelRepository.save(new Model(null, "Xiaomi M365"));
         pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Basic Plan", BigDecimal.valueOf(5), BigDecimal.valueOf(30), BigDecimal.valueOf(10)));
-        status = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
+        status = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
     }
 
     @AfterEach
@@ -96,14 +93,8 @@ class ScooterServiceImplIT {
         pricingPlanRepository.deleteAll();
         pricingPlanRepository.flush();
 
-        scooterStatusRepository.deleteAll();
-        scooterStatusRepository.flush();
-
         userRepository.deleteAll();
         userRepository.flush();
-
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test

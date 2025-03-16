@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
                     return new NoSuchElementException("User with ID: " + userId + " not found");
                 });
 
-        PaymentStatus status = paymentStatusRepository.findByName("PENDING")
+        PaymentStatus status = paymentStatusRepository.findByName("COMPLETED")
                 .orElseThrow(() -> {
                     log.error("Payment status not found");
                     return new NoSuchElementException("Payment status not found");
@@ -55,6 +55,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         Payment savedPayment = paymentRepository.save(payment);
+        user.setBalance(user.getBalance().add(amount));
+        userRepository.save(user);
         log.info("Created new payment with ID: {}", savedPayment.getId());
 
         return paymentMapper.toDto(savedPayment);

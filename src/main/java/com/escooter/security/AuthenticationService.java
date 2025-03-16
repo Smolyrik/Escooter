@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -26,12 +29,15 @@ public class AuthenticationService {
 
     @Transactional
     public JwtAuthenticationResponse signUp(SignUpRequest request) {
-        Role role = roleRepository.findByName("User");
+        Role role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new NoSuchElementException("Role not found"));
         var user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
+                .phone(request.getPhone())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
+                .balance(new BigDecimal(0))
                 .build();
 
         User savedUser = userRepository.save(user);

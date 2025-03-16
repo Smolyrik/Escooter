@@ -45,11 +45,6 @@ class PaymentServiceImplIT {
         System.setProperty("spring.datasource.password", postgres.getPassword());
     }
 
-    @AfterAll
-    static void teardown() {
-        postgres.stop();
-    }
-
     @Autowired
     private PaymentService paymentService;
 
@@ -66,12 +61,12 @@ class PaymentServiceImplIT {
     private RoleRepository roleRepository;
 
     private User testUser;
-    private PaymentStatus pendingStatus;
     private PaymentStatus completedStatus;
 
     @BeforeEach
     void setUp() {
-        Role userRole = roleRepository.save(new Role(null, "User"));
+        Role userRole = roleRepository.findByName("USER")
+                .orElse(new Role(null, "USER"));
         testUser = userRepository.save(User.builder()
                 .role(userRole)
                 .name("Test User")
@@ -81,16 +76,17 @@ class PaymentServiceImplIT {
                 .balance(new BigDecimal("200.00"))
                 .build());
 
-        pendingStatus = paymentStatusRepository.save(new PaymentStatus(null, "PENDING"));
-        completedStatus = paymentStatusRepository.save(new PaymentStatus(null, "COMPLETED"));
+        completedStatus = paymentStatusRepository.findByName("COMPLETED")
+                .orElse(new PaymentStatus(null, "COMPLETED"));
     }
 
     @AfterEach
     void cleanUp() {
         paymentRepository.deleteAll();
-        paymentStatusRepository.deleteAll();
+        paymentRepository.flush();
+
         userRepository.deleteAll();
-        roleRepository.deleteAll();
+        userRepository.flush();
     }
 
     @Test
@@ -103,7 +99,7 @@ class PaymentServiceImplIT {
         assertThat(payment.getId()).isNotNull();
         assertThat(payment.getUserId()).isEqualTo(testUser.getId());
         assertThat(payment.getAmount()).isEqualTo(amount);
-        assertThat(payment.getStatusId()).isEqualTo(pendingStatus.getId());
+        assertThat(payment.getStatusId()).isEqualTo(completedStatus.getId());
     }
 
     @Test

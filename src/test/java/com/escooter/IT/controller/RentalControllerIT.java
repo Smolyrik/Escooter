@@ -68,22 +68,28 @@ class RentalControllerIT {
     private User testUser;
     private Scooter testScooter;
     private RentalStatus activeStatus;
+    private RentalType rentalType;
+    @Autowired
+    private RentalTypeRepository rentalTypeRepository;
 
 
     @BeforeEach
     void setUp() {
-        String baseUrl = "http://localhost:" + port + "/rentals";
+        String baseUrl = "http://localhost:" + port + "/api/rentals";
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 
-        Role testRole = roleRepository.save(new Role(null, "MANAGER"));
+        Role testRole = roleRepository.findByName("MANAGER")
+                .orElse(new Role(null, "MANAGER"));
         testUser = userRepository.save(new User(null, testRole, "Test User", "test@example.com", "+1234567890", "hashedpassword", new BigDecimal("100.00")));
         RentalPoint rentalPoint = rentalPointRepository.save(new RentalPoint(null, "Central Station", new BigDecimal("40.7128"), new BigDecimal("-74.0060"), "NYC", testUser));
         Model model = modelRepository.save(new Model(null, "Test Model"));
         PricingPlan pricingPlan = pricingPlanRepository.save(new PricingPlan(null, "Basic Plan", new BigDecimal("5.00"), new BigDecimal("50.00"), new BigDecimal("10.00")));
-        activeStatus = rentalStatusRepository.save(new RentalStatus(null, "ACTIVE"));
-        rentalStatusRepository.save(new RentalStatus(null, "COMPLETED"));
-        ScooterStatus availableStatus = scooterStatusRepository.save(new ScooterStatus(null, "AVAILABLE"));
-        scooterStatusRepository.save(new ScooterStatus(null, "RENTED"));
+        rentalType = rentalTypeRepository.findByName("HOURLY")
+                .orElse(new RentalType(null, "HOURLY"));
+        activeStatus = rentalStatusRepository.findByName("ACTIVE")
+                .orElse(new RentalStatus(null, "ACTIVE"));
+        ScooterStatus availableStatus = scooterStatusRepository.findByName("AVAILABLE")
+                .orElse(new ScooterStatus(null, "AVAILABLE"));
         testScooter = scooterRepository.save(new Scooter(null, rentalPoint, model, pricingPlan, new BigDecimal("100"), availableStatus, new BigDecimal("50")));
 
     }
@@ -92,28 +98,27 @@ class RentalControllerIT {
     void cleanUp() {
         rentalRepository.deleteAll();
         rentalRepository.flush();
+
         scooterRepository.deleteAll();
         scooterRepository.flush();
+
         pricingPlanRepository.deleteAll();
         pricingPlanRepository.flush();
+
         modelRepository.deleteAll();
         modelRepository.flush();
+
         rentalPointRepository.deleteAll();
         rentalPointRepository.flush();
+
         userRepository.deleteAll();
         userRepository.flush();
-        rentalStatusRepository.deleteAll();
-        rentalStatusRepository.flush();
-        scooterStatusRepository.deleteAll();
-        scooterStatusRepository.flush();
-        roleRepository.deleteAll();
-        roleRepository.flush();
     }
 
     @Test
     void testStartRental() {
         RentalDto response = webClient.post()
-                .uri("/start?userId=" + testUser.getId() + "&scooterId=" + testScooter.getId())
+                .uri("/start?userId=" + testUser.getId() + "&scooterId=" + testScooter.getId() + "&rentalTypeId=" + rentalType.getId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
                 .retrieve()
                 .bodyToMono(RentalDto.class)
@@ -126,7 +131,7 @@ class RentalControllerIT {
 
     @Test
     void testGetAllRentals() {
-        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, LocalDateTime.now(), null, null, null));
+        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, null));
 
         RentalDto[] response = webClient.get()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
@@ -140,7 +145,7 @@ class RentalControllerIT {
 
     @Test
     void testEndRental() {
-        Rental rental = rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, LocalDateTime.now(), null, null, null));
+        Rental rental = rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, null));
 
         RentalDto response = webClient.post()
                 .uri("/end?rentalId=" + rental.getId())
@@ -155,7 +160,7 @@ class RentalControllerIT {
 
     @Test
     void testGetRentalsByUserId() {
-        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, LocalDateTime.now(), null, null, null));
+        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, null));
 
         RentalDto[] response = webClient.get()
                 .uri("/user/" + testUser.getId())
@@ -170,7 +175,7 @@ class RentalControllerIT {
 
     @Test
     void testGetRentalsByScooterId() {
-        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, LocalDateTime.now(), null, null, null));
+        rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, null));
 
         RentalDto[] response = webClient.get()
                 .uri("/scooter/" + testScooter.getId())

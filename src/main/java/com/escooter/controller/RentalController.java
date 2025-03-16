@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/rentals")
+@RequestMapping("/api/rentals")
 @RequiredArgsConstructor
 public class RentalController {
 
     private final RentalService rentalService;
 
     @PostMapping("/start")
-    public ResponseEntity<RentalDto> rentScooter(@RequestParam UUID userId, @RequestParam UUID scooterId) {
-        return ResponseEntity.ok(rentalService.rentScooter(userId, scooterId));
+    public ResponseEntity<RentalDto> rentScooter(@RequestParam UUID userId, @RequestParam UUID scooterId, @RequestParam Integer rentalTypeId) {
+        return ResponseEntity.ok(rentalService.rentScooter(userId, scooterId, rentalTypeId));
     }
 
     @GetMapping

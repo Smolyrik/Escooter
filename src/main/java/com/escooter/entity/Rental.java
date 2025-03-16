@@ -32,6 +32,10 @@ public class Rental {
     @JoinColumn(name = "status_id", referencedColumnName = "id")
     private RentalStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "rental_type_id", referencedColumnName = "id")
+    private RentalType rentalType;
+
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
