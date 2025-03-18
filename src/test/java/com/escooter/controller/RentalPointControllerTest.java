@@ -77,6 +77,20 @@ class RentalPointControllerTest {
     }
 
     @Test
+    void getNearbyRentalPoints_ShouldReturnListOfRentalPoints() {
+        BigDecimal latitude = BigDecimal.valueOf(55.7558);
+        BigDecimal longitude = BigDecimal.valueOf(37.6173);
+        when(rentalPointService.getNearbyRentalPoints(latitude, longitude)).thenReturn(List.of(rentalPointDto));
+
+        ResponseEntity<List<RentalPointDto>> response = rentalPointController.getNearbyRentalPoints(latitude, longitude);
+
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(rentalPointId, response.getBody().get(0).getId());
+        verify(rentalPointService, times(1)).getNearbyRentalPoints(latitude, longitude);
+    }
+
+    @Test
     void updateRentalPoint_ShouldReturnUpdatedRentalPointDto() {
         when(rentalPointService.updateRentalPoint(rentalPointId, rentalPointDto)).thenReturn(rentalPointDto);
 

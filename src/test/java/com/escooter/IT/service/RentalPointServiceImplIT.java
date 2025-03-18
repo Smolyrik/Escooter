@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -32,13 +33,12 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
 class RentalPointServiceImplIT {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.1")
+            .withDatabaseName("testdb");
 
     @BeforeAll
     static void setup() {
@@ -167,6 +167,45 @@ class RentalPointServiceImplIT {
             List<RentalPointDto> rentalPoints = rentalPointService.getAllRentalPoints();
 
             assertThat(rentalPoints).isNotEmpty();
+        }
+
+        @Test
+        void testGetNearbyRentalPoints() {
+            BigDecimal userLat = new BigDecimal("40.7128");
+            BigDecimal userLon = new BigDecimal("-74.0060");
+
+            rentalPointRepository.save(RentalPoint.builder()
+                    .name("Near Point")
+                    .latitude(new BigDecimal("40.7130"))
+                    .longitude(new BigDecimal("-74.0055"))
+                    .address("10 Close St")
+                    .manager(testManager)
+                    .build());
+
+            rentalPointRepository.save(RentalPoint.builder()
+                    .name("Medium Point")
+                    .latitude(new BigDecimal("40.7200"))
+                    .longitude(new BigDecimal("-74.0000"))
+                    .address("20 Medium St")
+                    .manager(testManager)
+                    .build());
+
+            rentalPointRepository.save(RentalPoint.builder()
+                    .name("Far Point")
+                    .latitude(new BigDecimal("40.7300"))
+                    .longitude(new BigDecimal("-73.9900"))
+                    .address("30 Far St")
+                    .manager(testManager)
+                    .build());
+
+            List<RentalPointDto> sortedRentalPoints = rentalPointService.getNearbyRentalPoints(userLat, userLon);
+
+            assertThat(sortedRentalPoints).isNotEmpty();
+            assertThat(sortedRentalPoints).hasSize(3);
+
+            assertThat(sortedRentalPoints.get(0).getName()).isEqualTo("Near Point");
+            assertThat(sortedRentalPoints.get(1).getName()).isEqualTo("Medium Point");
+            assertThat(sortedRentalPoints.get(2).getName()).isEqualTo("Far Point");
         }
     }
 

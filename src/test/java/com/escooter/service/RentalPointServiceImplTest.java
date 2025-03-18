@@ -118,6 +118,39 @@ class RentalPointServiceImplTest {
     }
 
     @Test
+    void getNearbyRentalPoints_ShouldReturnSortedRentalPoints() {
+        RentalPoint rentalPoint2 = RentalPoint.builder()
+                .id(UUID.randomUUID())
+                .name("Test Point 2")
+                .latitude(BigDecimal.valueOf(55.7560))
+                .longitude(BigDecimal.valueOf(37.6200))
+                .address("Test Address 2")
+                .build();
+
+        RentalPointDto rentalPointDto2 = RentalPointDto.builder()
+                .id(rentalPoint2.getId())
+                .name("Test Point 2")
+                .latitude(BigDecimal.valueOf(55.7560))
+                .longitude(BigDecimal.valueOf(37.6200))
+                .address("Test Address 2")
+                .build();
+
+        when(rentalPointRepository.findAll()).thenReturn(List.of(rentalPoint, rentalPoint2));
+        when(rentalPointMapper.toDto(rentalPoint)).thenReturn(rentalPointDto);
+        when(rentalPointMapper.toDto(rentalPoint2)).thenReturn(rentalPointDto2);
+
+        List<RentalPointDto> result = rentalPointService.getNearbyRentalPoints(
+                BigDecimal.valueOf(55.7555), BigDecimal.valueOf(37.6170));
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        assertEquals(rentalPointDto.getId(), result.getFirst().getId());
+
+        verify(rentalPointRepository, times(1)).findAll();
+    }
+
+    @Test
     void updateRentalPoint_ShouldReturnUpdatedRentalPointDto() {
         when(rentalPointRepository.existsById(rentalPointId)).thenReturn(true);
         when(rentalPointMapper.toEntity(rentalPointDto)).thenReturn(rentalPoint);

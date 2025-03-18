@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class RentalPointControllerIT {
 
     @LocalServerPort
@@ -135,6 +137,40 @@ class RentalPointControllerIT {
 
         assertThat(response).isNotNull();
         assertThat(response.length).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void testGetNearbyRentalPoints() {
+
+        rentalPointRepository.save(
+                new RentalPoint(null, "Closest Point", new BigDecimal("40.7128"), new BigDecimal("-74.0060"), "NYC", testUser)
+        );
+        rentalPointRepository.save(
+                new RentalPoint(null, "Middle Point", new BigDecimal("40.7306"), new BigDecimal("-73.9352"), "NYC", testUser)
+        );
+        rentalPointRepository.save(
+                new RentalPoint(null, "Farthest Point", new BigDecimal("40.7851"), new BigDecimal("-73.9683"), "NYC", testUser)
+        );
+
+        BigDecimal userLat = new BigDecimal("40.7130");
+        BigDecimal userLon = new BigDecimal("-74.0055");
+
+        RentalPointDto[] response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/nearby")
+                        .queryParam("latitude", userLat)
+                        .queryParam("longitude", userLon)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
+                .retrieve()
+                .bodyToMono(RentalPointDto[].class)
+                .block();
+
+        assertThat(response).isNotNull();
+        assertThat(response.length).isEqualTo(3);
+        assertThat(response[0].getName()).isEqualTo("Closest Point");
+        assertThat(response[1].getName()).isEqualTo("Middle Point");
+        assertThat(response[2].getName()).isEqualTo("Farthest Point");
     }
 
     @Test

@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -51,6 +53,21 @@ public class RentalPointServiceImpl implements RentalPointService {
     public List<RentalPointDto> getAllRentalPoints() {
         log.info("Fetching all rental points");
         return rentalPointRepository.findAll().stream()
+                .map(rentalPointMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RentalPointDto> getNearbyRentalPoints(BigDecimal userLat, BigDecimal userLon) {
+        log.info("Fetching rental points sorted by distance from user location: {}, {}", userLat, userLon);
+
+        double userLatDouble = userLat.doubleValue();
+        double userLonDouble = userLon.doubleValue();
+
+        return rentalPointRepository.findAll().stream()
+                .sorted(Comparator.comparingDouble(point -> haversineDistance(
+                        userLatDouble, userLonDouble,
+                        point.getLatitude().doubleValue(), point.getLongitude().doubleValue())))
                 .map(rentalPointMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -111,5 +128,16 @@ public class RentalPointServiceImpl implements RentalPointService {
         return scooterRepository.getInRepairScootersByRentalPointId(rentalPointId).stream()
                 .map(scooterMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }
