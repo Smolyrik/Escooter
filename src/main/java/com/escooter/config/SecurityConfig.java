@@ -59,13 +59,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/rental-points/**").hasRole("MANAGER")
                         .requestMatchers("/api/reports/**").hasRole("MANAGER")
                         .requestMatchers( "/api/rentals/**").hasRole("MANAGER")
+                        .requestMatchers("/api/payments/**").hasAnyRole( "MANAGER")
 
                         .requestMatchers(HttpMethod.GET, "/api/rental-points/nearby").hasAnyRole("USER", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/rental-points/*/scooters/available").hasAnyRole("USER", "MANAGER")
                         .requestMatchers("/api/rentals/start").hasAnyRole("USER", "MANAGER")
                         .requestMatchers("/api/rentals/end").hasAnyRole("USER", "MANAGER")
                         .requestMatchers("/api/rentals/user/**").hasAnyRole("USER", "MANAGER")
-                        .requestMatchers("/api/payments/**").hasAnyRole("USER", "MANAGER")
+                        .requestMatchers("/api/payments/user/**").hasAnyRole("USER", "MANAGER")
 
                         .requestMatchers("/api/users/**").authenticated()
 

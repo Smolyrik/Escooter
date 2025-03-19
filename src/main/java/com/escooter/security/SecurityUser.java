@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class SecurityUser implements UserDetails {
@@ -47,5 +48,9 @@ public class SecurityUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public UUID getUserId() {
+        return user.getId();
     }
 }

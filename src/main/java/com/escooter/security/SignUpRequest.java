@@ -20,6 +20,7 @@ public class SignUpRequest {
             message = "Phone number must be in a valid format (e.g., +1234567890)")
     private String phone;
 
+    @Size(min = 8, max = 255, message = "Password length must be between 8 and 255 characters")
     @Size(max = 255, message = "Password length must be no more than 255 characters")
     private String password;
 }

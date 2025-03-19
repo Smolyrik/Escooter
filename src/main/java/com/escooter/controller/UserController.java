@@ -63,7 +63,7 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @GetMapping("/{userId}")
-    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<UserDto> getUserById(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
@@ -118,7 +118,7 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @PatchMapping("/{userId}")
-    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<UserDto> updateUserPartially(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId,
@@ -136,7 +136,7 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @PatchMapping("/{userId}/password")
-    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<Void> changePassword(
             @Parameter(description = "User ID")
             @PathVariable UUID userId,
@@ -155,7 +155,7 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @DeleteMapping("/{userId}")
-    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
