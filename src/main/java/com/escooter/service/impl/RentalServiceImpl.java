@@ -66,6 +66,7 @@ public class RentalServiceImpl implements RentalService {
                 .startTime(LocalDateTime.now())
                 .status(activeStatus)
                 .rentalType(rentalType)
+                .distance(BigDecimal.ZERO)
                 .build();
 
         Rental savedRental = rentalRepository.save(rental);
@@ -86,7 +87,7 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Transactional
-    public RentalDto endRental(UUID rentalId) {
+    public RentalDto endRental(UUID rentalId, BigDecimal distance) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new NoSuchElementException("Rental with ID: " + rentalId + " not found"));
 
@@ -100,6 +101,7 @@ public class RentalServiceImpl implements RentalService {
         rental.setStatus(completedStatus);
         BigDecimal totalPrice = calculateTotalPrice(rental);
         rental.setTotalPrice(totalPrice);
+        rental.setDistance(distance);
 
         User user = rental.getUser();
         BigDecimal newBalance = user.getBalance().subtract(totalPrice);
@@ -108,6 +110,7 @@ public class RentalServiceImpl implements RentalService {
 
         Scooter scooter = rental.getScooter();
         scooter.setStatus(availableStatus);
+        scooter.setMileage(scooter.getMileage().add(distance));
         scooterRepository.save(scooter);
 
         Rental savedRental = rentalRepository.save(rental);

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +54,8 @@ public class PricingPlanController {
             })
     @GetMapping("/{id}")
     public ResponseEntity<PricingPlanDto> getPricingPlan(
-            @Parameter(description = "Pricing Plan ID") @PathVariable UUID id) {
+            @Parameter(description = "Pricing Plan ID")
+            @NotNull(message = "Pricing Plan ID cannot be null") @PathVariable UUID id) {
         return ResponseEntity.ok(pricingPlanService.getPricingPlan(id));
     }
 
@@ -84,7 +86,8 @@ public class PricingPlanController {
             })
     @PutMapping("/{id}")
     public ResponseEntity<PricingPlanDto> updatePricingPlan(
-            @Parameter(description = "Pricing Plan ID") @PathVariable UUID id,
+            @Parameter(description = "Pricing Plan ID")
+            @NotNull(message = "Pricing Plan ID cannot be null") @PathVariable UUID id,
             @Valid @RequestBody PricingPlanDto pricingPlanDto) {
         return ResponseEntity.ok(pricingPlanService.updatePricingPlan(id, pricingPlanDto));
     }
@@ -99,7 +102,8 @@ public class PricingPlanController {
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePricingPlan(
-            @Parameter(description = "Pricing Plan ID") @PathVariable UUID id) {
+            @Parameter(description = "Pricing Plan ID")
+            @NotNull(message = "Pricing Plan ID cannot be null") @PathVariable UUID id) {
         pricingPlanService.deletePricingPlan(id);
         return ResponseEntity.noContent().build();
     }

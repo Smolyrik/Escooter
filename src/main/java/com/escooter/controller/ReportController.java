@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,8 @@ public class ReportController {
             })
     @GetMapping("/{id}")
     public ResponseEntity<ReportDto> getReport(
-            @Parameter(description = "Report ID") @PathVariable UUID id) {
+            @Parameter(description = "Report ID")
+            @NotNull(message = "Report ID cannot be null") @PathVariable UUID id) {
         return ResponseEntity.ok(reportService.getReport(id));
     }
 
@@ -88,7 +90,8 @@ public class ReportController {
             })
     @PutMapping("/{id}")
     public ResponseEntity<ReportDto> updateReport(
-            @Parameter(description = "Report ID") @PathVariable UUID id,
+            @Parameter(description = "Report ID")
+            @NotNull(message = "Report ID cannot be null") @PathVariable UUID id,
             @Valid @RequestBody ReportDto reportDto) {
         return ResponseEntity.ok(reportService.updateReport(id, reportDto));
     }
@@ -103,7 +106,8 @@ public class ReportController {
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReport(
-            @Parameter(description = "Report ID") @PathVariable UUID id) {
+            @Parameter(description = "Report ID")
+            @NotNull(message = "Report ID cannot be null") @PathVariable UUID id) {
         reportService.deleteReport(id);
         return ResponseEntity.noContent().build();
     }

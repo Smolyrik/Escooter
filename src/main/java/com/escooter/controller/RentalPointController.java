@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +57,8 @@ public class RentalPointController {
             })
     @GetMapping("/{id}")
     public ResponseEntity<RentalPointDto> getRentalPointById(
-            @Parameter(description = "Rental point ID") @PathVariable UUID id) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id) {
         return ResponseEntity.ok(rentalPointService.getRentalPointById(id));
     }
 
@@ -77,14 +81,23 @@ public class RentalPointController {
             description = "Fetches a list of nearby rental points based on user location.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully fetched nearby rental points",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RentalPointDto.class))),
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = RentalPointDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input"),
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/nearby")
     public ResponseEntity<List<RentalPointDto>> getNearbyRentalPoints(
-            @Parameter(description = "User latitude") @RequestParam BigDecimal latitude,
-            @Parameter(description = "User longitude") @RequestParam BigDecimal longitude) {
+            @Parameter(description = "User latitude")
+            @RequestParam @NotNull @DecimalMin(value = "-90.0", message = "Latitude must be >= -90")
+            @DecimalMax(value = "90.0", message = "Latitude must be <= 90")
+            BigDecimal latitude,
+
+            @Parameter(description = "User longitude")
+            @RequestParam @NotNull @DecimalMin(value = "-180.0", message = "Longitude must be >= -180")
+            @DecimalMax(value = "180.0", message = "Longitude must be <= 180")
+            BigDecimal longitude) {
+
         return ResponseEntity.ok(rentalPointService.getNearbyRentalPoints(latitude, longitude));
     }
 
@@ -99,7 +112,8 @@ public class RentalPointController {
             })
     @PutMapping("/{id}")
     public ResponseEntity<RentalPointDto> updateRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID id,
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id,
             @Valid @RequestBody RentalPointDto rentalPointDto) {
         return ResponseEntity.ok(rentalPointService.updateRentalPoint(id, rentalPointDto));
     }
@@ -113,7 +127,8 @@ public class RentalPointController {
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID id) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id) {
         rentalPointService.deleteRentalPoint(id);
         return ResponseEntity.noContent().build();
     }
@@ -129,7 +144,8 @@ public class RentalPointController {
             })
     @GetMapping("/{rentalPointId}/scooters")
     public ResponseEntity<List<ScooterDto>> getAllScootersByRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID rentalPointId) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
         return ResponseEntity.ok(rentalPointService.getAllScootersByRentalPoint(rentalPointId));
     }
 
@@ -144,7 +160,8 @@ public class RentalPointController {
             })
     @GetMapping("/{rentalPointId}/scooters/available")
     public ResponseEntity<List<ScooterDto>> getAvailableScootersByRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID rentalPointId) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
         return ResponseEntity.ok(rentalPointService.getAvailableScootersByRentalPoint(rentalPointId));
     }
 
@@ -159,7 +176,8 @@ public class RentalPointController {
             })
     @GetMapping("/{rentalPointId}/scooters/rented")
     public ResponseEntity<List<ScooterDto>> getRentedScootersByRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID rentalPointId) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
         return ResponseEntity.ok(rentalPointService.getRentedScootersByRentalPoint(rentalPointId));
     }
 
@@ -174,7 +192,8 @@ public class RentalPointController {
             })
     @GetMapping("/{rentalPointId}/scooters/repair")
     public ResponseEntity<List<ScooterDto>> getScootersOnRepairByRentalPoint(
-            @Parameter(description = "Rental point ID") @PathVariable UUID rentalPointId) {
+            @Parameter(description = "Rental point ID")
+            @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
         return ResponseEntity.ok(rentalPointService.getScootersOnRepairByRentalPoint(rentalPointId));
     }
 }

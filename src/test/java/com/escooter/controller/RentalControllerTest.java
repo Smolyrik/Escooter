@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,13 +69,13 @@ class RentalControllerTest {
 
     @Test
     void endRental_ShouldReturnUpdatedRentalDto() {
-        when(rentalService.endRental(rentalId)).thenReturn(rentalDto);
+        when(rentalService.endRental(rentalId, BigDecimal.TEN)).thenReturn(rentalDto);
 
-        ResponseEntity<RentalDto> response = rentalController.endRental(rentalId);
+        ResponseEntity<RentalDto> response = rentalController.endRental(rentalId, BigDecimal.TEN);
 
         assertNotNull(response.getBody());
         assertEquals(rentalId, response.getBody().getId());
-        verify(rentalService, times(1)).endRental(rentalId);
+        verify(rentalService, times(1)).endRental(rentalId, BigDecimal.TEN);
     }
 
     @Test

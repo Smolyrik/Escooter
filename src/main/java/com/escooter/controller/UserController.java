@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,8 @@ public class UserController {
     @GetMapping("/{userId}")
     @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
     public ResponseEntity<UserDto> getUserById(
-            @Parameter(description = "User ID") @PathVariable UUID userId) {
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
@@ -96,7 +98,8 @@ public class UserController {
     @PutMapping("/{userId}")
     @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
     public ResponseEntity<UserDto> updateUser(
-            @Parameter(description = "User ID") @PathVariable UUID userId,
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId,
             @Valid @RequestBody UserDto userDto) {
         return ResponseEntity.ok(userService.updateUser(userId, userDto));
     }
@@ -113,7 +116,8 @@ public class UserController {
     @DeleteMapping("/{userId}")
     @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
     public ResponseEntity<Void> deleteUser(
-            @Parameter(description = "User ID") @PathVariable UUID userId) {
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }

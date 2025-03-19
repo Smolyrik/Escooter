@@ -9,10 +9,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,11 +40,19 @@ public class RentalController {
             })
     @PostMapping("/start")
     public ResponseEntity<RentalDto> rentScooter(
-            @Parameter(description = "User ID") @RequestParam UUID userId,
-            @Parameter(description = "Scooter ID") @RequestParam UUID scooterId,
-            @Parameter(description = "Rental Type ID") @RequestParam Integer rentalTypeId) {
+            @Parameter(description = "User ID")
+            @RequestParam @NotNull(message = "User ID cannot be null") UUID userId,
+
+            @Parameter(description = "Scooter ID")
+            @RequestParam @NotNull(message = "Scooter ID cannot be null") UUID scooterId,
+
+            @Parameter(description = "Rental type ID")
+            @RequestParam @NotNull(message = "Rental type cannot be null") Integer rentalTypeId
+            ) {
+
         return ResponseEntity.ok(rentalService.rentScooter(userId, scooterId, rentalTypeId));
     }
+
 
     @Operation(
             summary = "Get all rentals",
@@ -70,8 +81,14 @@ public class RentalController {
             })
     @PostMapping("/end")
     public ResponseEntity<RentalDto> endRental(
-            @Parameter(description = "Rental ID") @RequestParam UUID rentalId) {
-        return ResponseEntity.ok(rentalService.endRental(rentalId));
+            @Parameter(description = "Rental ID")
+            @NotNull(message = "Rental ID cannot be null") @RequestParam UUID rentalId,
+
+            @Parameter(description = "Rental distance")
+            @DecimalMin(value = "0.01", message = "Distance must be at least 0.01km")
+            @NotNull(message = "Rental distance cannot be null") @RequestParam BigDecimal distance
+            ) {
+        return ResponseEntity.ok(rentalService.endRental(rentalId, distance));
     }
 
     @Operation(
@@ -86,7 +103,8 @@ public class RentalController {
             })
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RentalDto>> getRentalsByUserId(
-            @Parameter(description = "User ID") @PathVariable UUID userId) {
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
         return ResponseEntity.ok(rentalService.getRentalsByUserId(userId));
     }
 
@@ -102,7 +120,8 @@ public class RentalController {
             })
     @GetMapping("/scooter/{scooterId}")
     public ResponseEntity<List<RentalDto>> getRentalsByScooterId(
-            @Parameter(description = "Scooter ID") @PathVariable UUID scooterId) {
+            @Parameter(description = "Scooter ID")
+            @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId) {
         return ResponseEntity.ok(rentalService.getRentalsByScooterId(scooterId));
     }
 }

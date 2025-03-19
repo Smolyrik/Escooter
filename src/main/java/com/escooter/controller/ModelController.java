@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,9 @@ public class ModelController {
                     @ApiResponse(responseCode = "404", description = "Model not found")
             })
     @GetMapping("/{id}")
-    public ResponseEntity<ModelDto> getModelById(@Parameter(description = "ID of the model") @PathVariable Integer id) {
+    public ResponseEntity<ModelDto> getModelById(
+            @Parameter(description = "Model ID")
+            @NotNull(message = "Model ID cannot be null") @PathVariable Integer id) {
         return ResponseEntity.ok(modelService.getModelById(id));
     }
 
@@ -86,7 +89,8 @@ public class ModelController {
             })
     @PutMapping("/{id}")
     public ResponseEntity<ModelDto> updateModel(
-            @Parameter(description = "ID of the model") @PathVariable Integer id,
+            @Parameter(description = "Model ID")
+            @NotNull(message = "Model ID cannot be null") @PathVariable Integer id,
             @Valid @RequestBody ModelDto modelDto) {
         return ResponseEntity.ok(modelService.updateModel(id, modelDto));
     }
@@ -100,7 +104,10 @@ public class ModelController {
                     @ApiResponse(responseCode = "404", description = "Model not found")
             })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteModel(@Parameter(description = "ID of the model") @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteModel(
+            @Parameter(description = "Model ID")
+            @NotNull(message = "Model ID cannot be null") @PathVariable Integer id
+    ) {
         modelService.deleteModel(id);
         return ResponseEntity.noContent().build();
     }

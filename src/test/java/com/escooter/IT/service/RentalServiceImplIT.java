@@ -63,9 +63,6 @@ class RentalServiceImplIT {
     private ScooterRepository scooterRepository;
 
     @Autowired
-    private RentalStatusRepository rentalStatusRepository;
-
-    @Autowired
     private ScooterStatusRepository scooterStatusRepository;
 
     @Autowired
@@ -157,7 +154,7 @@ class RentalServiceImplIT {
     @Test
     void testEndRental() {
         RentalDto rentalDto = rentalService.rentScooter(testUser.getId(), testScooter.getId(), testRentalType.getId());
-        RentalDto endedRental = rentalService.endRental(rentalDto.getId());
+        RentalDto endedRental = rentalService.endRental(rentalDto.getId(), BigDecimal.TEN);
         assertThat(endedRental).isNotNull();
         assertThat(endedRental.getEndTime()).isNotNull();
         assertThat(endedRental.getTotalPrice()).isNotNull();
@@ -199,7 +196,7 @@ class RentalServiceImplIT {
     @Test
     void testEndRentalWhenNotFound() {
         UUID fakeRentalId = UUID.randomUUID();
-        assertThatThrownBy(() -> rentalService.endRental(fakeRentalId))
+        assertThatThrownBy(() -> rentalService.endRental(fakeRentalId, BigDecimal.TEN))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("not found");
     }

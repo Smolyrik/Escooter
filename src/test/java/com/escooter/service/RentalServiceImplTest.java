@@ -74,6 +74,7 @@ class RentalServiceImplTest {
                 .id(scooterId)
                 .pricingPlan(PricingPlan.builder().pricePerHour(new BigDecimal("5.00")).build())
                 .status(ScooterStatus.builder().name("AVAILABLE").build())
+                .mileage(new BigDecimal("100"))
                 .build();
 
         rentalType = RentalType.builder().id(rentalTypeId).name("HOURLY").build();
@@ -86,6 +87,7 @@ class RentalServiceImplTest {
                 .startTime(LocalDateTime.now())
                 .status(activeStatus)
                 .rentalType(rentalType)
+                .distance(BigDecimal.ZERO)
                 .build();
 
         rentalDto = RentalDto.builder()
@@ -95,6 +97,7 @@ class RentalServiceImplTest {
                 .startTime(LocalDateTime.now())
                 .statusId(1)
                 .rentalTypeId(rentalTypeId)
+                .distance(BigDecimal.ZERO)
                 .build();
     }
 
@@ -153,6 +156,7 @@ class RentalServiceImplTest {
     @Test
     void endRental_ShouldCalculatePriceAndUpdateUserBalance() {
         rental.setStartTime(LocalDateTime.now().minusHours(2));
+        rental.setDistance(BigDecimal.ZERO);
 
         RentalStatus completedStatus = new RentalStatus(null, "COMPLETED");
         ScooterStatus availableStatus = new ScooterStatus(null, "AVAILABLE");
@@ -163,7 +167,7 @@ class RentalServiceImplTest {
         when(rentalRepository.save(any(Rental.class))).thenReturn(rental);
         when(rentalMapper.toDto(rental)).thenReturn(rentalDto);
 
-        RentalDto result = rentalService.endRental(rentalId);
+        RentalDto result = rentalService.endRental(rentalId, BigDecimal.TEN);
 
         assertNotNull(result);
         verify(scooterRepository, times(1)).save(any(Scooter.class));
@@ -174,7 +178,7 @@ class RentalServiceImplTest {
     void endRental_ShouldThrowException_WhenRentalNotFound() {
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> rentalService.endRental(rentalId));
+        assertThrows(NoSuchElementException.class, () -> rentalService.endRental(rentalId, BigDecimal.TEN));
     }
 
     @Test

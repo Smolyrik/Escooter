@@ -147,11 +147,13 @@ class RentalControllerIT {
 
     @Test
     void testEndRental() {
-        Rental rental = rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, null));
+        Rental rental = rentalRepository.save(new Rental(null, testUser, testScooter, activeStatus, rentalType, LocalDateTime.now(), null, null, BigDecimal.ZERO));
 
         RentalDto response = webClient.post()
-                .uri("/end?rentalId=" + rental.getId())
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
+                .uri(uriBuilder -> uriBuilder.path("/end")
+                        .queryParam("rentalId", rental.getId())
+                        .queryParam("distance", BigDecimal.valueOf(10))
+                        .build())                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
                 .retrieve()
                 .bodyToMono(RentalDto.class)
                 .block();

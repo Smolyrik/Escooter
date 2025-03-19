@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,8 +42,14 @@ public class PaymentController {
             })
     @PostMapping("/make")
     public ResponseEntity<PaymentDto> makePayment(
-            @Parameter(description = "User ID") @RequestParam UUID userId,
-            @Parameter(description = "Payment amount") @RequestParam BigDecimal amount) {
+            @Parameter(description = "User ID")
+            @RequestParam @NotNull(message = "User ID cannot be null") UUID userId,
+
+            @Parameter(description = "Payment amount")
+            @RequestParam @NotNull(message = "Amount cannot be null")
+            @DecimalMin(value = "0.01", message = "Amount must be at least 0.01")
+            BigDecimal amount) {
+
         PaymentDto payment = paymentService.makePayment(userId, amount);
         return ResponseEntity.ok(payment);
     }
@@ -58,7 +66,8 @@ public class PaymentController {
             })
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentDto> getPaymentById(
-            @Parameter(description = "Payment ID") @PathVariable UUID paymentId) {
+            @Parameter(description = "Payment ID")
+            @NotNull(message = "Payment ID cannot be null") @PathVariable UUID paymentId) {
         PaymentDto payment = paymentService.getPaymentById(paymentId);
         return ResponseEntity.ok(payment);
     }
@@ -74,7 +83,8 @@ public class PaymentController {
             })
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PaymentDto>> getUserPayments(
-            @Parameter(description = "User ID") @PathVariable UUID userId) {
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
         List<PaymentDto> payments = paymentService.getUserPayments(userId);
         return ResponseEntity.ok(payments);
     }
@@ -92,7 +102,9 @@ public class PaymentController {
             })
     @PatchMapping("/{paymentId}/status")
     public ResponseEntity<PaymentDto> updatePaymentStatus(
-            @Parameter(description = "Payment ID") @PathVariable UUID paymentId,
+            @Parameter(description = "Payment ID")
+            @NotNull(message = "Payment ID cannot be null") @PathVariable UUID paymentId,
+
             @Valid @RequestBody PaymentStatusDto statusDto) {
         PaymentDto updatedPayment = paymentService.updatePaymentStatus(paymentId, statusDto);
         return ResponseEntity.ok(updatedPayment);

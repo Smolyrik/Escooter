@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +59,8 @@ public class ScooterController {
             })
     @GetMapping("/{scooterId}")
     public ResponseEntity<ScooterDto> getScooterById(
-            @Parameter(description = "Scooter ID") @PathVariable UUID scooterId) {
+            @Parameter(description = "Scooter ID")
+            @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId) {
         return ResponseEntity.ok(scooterService.getScooterById(scooterId));
     }
 
@@ -89,7 +91,8 @@ public class ScooterController {
             })
     @PutMapping("/{scooterId}")
     public ResponseEntity<ScooterDto> updateScooter(
-            @Parameter(description = "Scooter ID") @PathVariable UUID scooterId,
+            @Parameter(description = "Scooter ID")
+            @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId,
             @Valid @RequestBody ScooterDto scooterDto) {
         return ResponseEntity.ok(scooterService.updateScooter(scooterId, scooterDto));
     }
@@ -104,7 +107,8 @@ public class ScooterController {
             })
     @DeleteMapping("/{scooterId}")
     public ResponseEntity<Void> deleteScooter(
-            @Parameter(description = "Scooter ID") @PathVariable UUID scooterId) {
+            @Parameter(description = "Scooter ID")
+            @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId) {
         scooterService.deleteScooter(scooterId);
         return ResponseEntity.noContent().build();
     }
@@ -121,7 +125,8 @@ public class ScooterController {
             })
     @GetMapping("/{scooterId}/pricing-plan")
     public ResponseEntity<PricingPlanDto> getPricingPlanByScooterId(
-            @Parameter(description = "Scooter ID") @PathVariable UUID scooterId) {
+            @Parameter(description = "Scooter ID")
+            @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId) {
         return ResponseEntity.ok(scooterService.getPricingPlanByScooterId(scooterId));
     }
 }

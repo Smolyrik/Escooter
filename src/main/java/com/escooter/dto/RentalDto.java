@@ -42,5 +42,6 @@ public class RentalDto {
     @Min(0)
     private BigDecimal totalPrice;
 
+    @NotNull(message = "Distance must be not null")
     private BigDecimal distance;
 }
