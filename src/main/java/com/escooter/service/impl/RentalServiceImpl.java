@@ -36,10 +36,13 @@ public class RentalServiceImpl implements RentalService {
 
     @Transactional
     public RentalDto rentScooter(UUID userId, UUID scooterId, Integer rentalTypeId) {
+        log.info("Attempting to rent scooter. User ID: {}, Scooter ID: {}, Rental Type ID: {}", userId, scooterId, rentalTypeId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User with ID: " + userId + " not found"));
 
         if (user.getBalance().compareTo(BigDecimal.ZERO) < 0) {
+            log.error("User with ID: {} has insufficient balance", userId);
             throw new IllegalStateException("User with ID: " + userId + " has a negative balance and cannot rent a scooter.");
         }
 
@@ -51,6 +54,7 @@ public class RentalServiceImpl implements RentalService {
 
         boolean isScooterAvailable = scooterRepository.existsByIdAndStatus_Name(scooter.getId(), "AVAILABLE");
         if (!isScooterAvailable) {
+            log.error("Scooter with ID: {} is already rented", scooterId);
             throw new IllegalStateException("Scooter with ID: " + scooterId + " is already rented");
         }
 
@@ -74,34 +78,36 @@ public class RentalServiceImpl implements RentalService {
         scooter.setStatus(scooterStatus);
         scooterRepository.save(scooter);
 
-        log.info("Started rental with ID: {}", savedRental.getId());
+        log.info("Rental started successfully. Rental ID: {}", savedRental.getId());
         return rentalMapper.toDto(savedRental);
     }
 
 
     @Transactional(readOnly = true)
     public List<RentalDto> getAllRentals() {
-        return rentalRepository.findAll().stream()
+        log.info("Fetching all rentals");
+        List<RentalDto> rentals = rentalRepository.findAll().stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Successfully fetched {} rentals", rentalRepository.count());
+        return rentals;
     }
 
     @Transactional
     public RentalDto endRental(UUID rentalId, BigDecimal distance) {
+        log.info("Attempting to end rental. Rental ID: {}", rentalId);
+
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new NoSuchElementException("Rental with ID: " + rentalId + " not found"));
 
-        RentalStatus completedStatus = rentalStatusRepository.findByName("COMPLETED")
-                .orElseThrow(() -> new NoSuchElementException("Rental status 'Completed' not found"));
-
-        ScooterStatus availableStatus = scooterStatusRepository.findByName("AVAILABLE")
-                .orElseThrow(() -> new NoSuchElementException("Scooter status 'Available' not found"));
-
         rental.setEndTime(LocalDateTime.now());
-        rental.setStatus(completedStatus);
         BigDecimal totalPrice = calculateTotalPrice(rental);
         rental.setTotalPrice(totalPrice);
         rental.setDistance(distance);
+
+        RentalStatus completedStatus = rentalStatusRepository.findByName("COMPLETED")
+                .orElseThrow(() -> new NoSuchElementException("Rental status 'Completed' not found"));
+        rental.setStatus(completedStatus);
 
         User user = rental.getUser();
         BigDecimal newBalance = user.getBalance().subtract(totalPrice);
@@ -109,31 +115,41 @@ public class RentalServiceImpl implements RentalService {
         userRepository.save(user);
 
         Scooter scooter = rental.getScooter();
+        ScooterStatus availableStatus = scooterStatusRepository.findByName("AVAILABLE")
+                .orElseThrow(() -> new NoSuchElementException("Scooter status 'Available' not found"));
         scooter.setStatus(availableStatus);
         scooter.setMileage(scooter.getMileage().add(distance));
         scooterRepository.save(scooter);
 
         Rental savedRental = rentalRepository.save(rental);
-        log.info("Ended rental with ID: {}, User balance after payment: {}", savedRental.getId(), user.getBalance());
+        log.info("Rental ended successfully. Rental ID: {}, Total Price: {}, User new balance: {}", savedRental.getId(), totalPrice, user.getBalance());
 
         return rentalMapper.toDto(savedRental);
     }
 
     @Transactional(readOnly = true)
     public List<RentalDto> getRentalsByUserId(UUID userId) {
-        return rentalRepository.findByUserId(userId).stream()
+        log.info("Fetching rentals for user with ID: {}", userId);
+        List<RentalDto> rentals = rentalRepository.findByUserId(userId).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Found {} rentals for user with ID: {}", rentals.size(), userId);
+        return rentals;
     }
 
     @Transactional(readOnly = true)
     public List<RentalDto> getRentalsByScooterId(UUID scooterId) {
-        return rentalRepository.findByScooterId(scooterId).stream()
+        log.info("Fetching rentals for scooter with ID: {}", scooterId);
+        List<RentalDto> rentals = rentalRepository.findByScooterId(scooterId).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Found {} rentals for scooter with ID: {}", rentals.size(), scooterId);
+        return rentals;
     }
 
     private BigDecimal calculateTotalPrice(Rental rental) {
+        log.info("Calculating total price for Rental ID: {}", rental.getId());
+
         Duration duration = Duration.between(rental.getStartTime(), rental.getEndTime());
         BigDecimal hours = BigDecimal.valueOf(duration.toMinutes()).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
@@ -148,6 +164,7 @@ public class RentalServiceImpl implements RentalService {
         } else if ("Subscription".equalsIgnoreCase(rentalType.getName())) {
             totalPrice = subscriptionPrice.multiply(hours);
         } else {
+            log.error("Unknown rental type: {}", rentalType.getName());
             throw new IllegalStateException("Unknown rental type: " + rentalType.getName());
         }
 
@@ -155,6 +172,7 @@ public class RentalServiceImpl implements RentalService {
             totalPrice = totalPrice.subtract(totalPrice.multiply(discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)));
         }
 
+        log.info("Total price calculated: {} for Rental ID: {}", totalPrice, rental.getId());
         return totalPrice;
     }
 }

@@ -1,5 +1,7 @@
 package com.escooter.IT.service;
 
+import com.escooter.dto.ChangePasswordRequest;
+import com.escooter.dto.PartialUpdateUserRequest;
 import com.escooter.dto.UserDto;
 import com.escooter.entity.Role;
 import com.escooter.entity.User;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -51,6 +54,9 @@ class UserServiceImplIT {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private Role testRole;
 
@@ -112,6 +118,49 @@ class UserServiceImplIT {
         assertThat(updatedUser.getName()).isEqualTo("Bobby");
         assertThat(updatedUser.getBalance()).isEqualTo(new BigDecimal("50.00"));
     }
+
+    @Test
+    void testPartialUpdateUser() {
+        User user = userRepository.save(User.builder()
+                .role(testRole)
+                .name("Eve")
+                .email("eve@example.com")
+                .phone("+123456789")
+                .passwordHash("oldhash")
+                .balance(new BigDecimal("40.00"))
+                .build());
+
+        PartialUpdateUserRequest updateRequest = new PartialUpdateUserRequest();
+        updateRequest.setName("Eve Updated");
+        updateRequest.setEmail("eve.updated@example.com");
+        updateRequest.setPhone("+987654321");
+
+        UserDto updatedUser = userService.partialUpdateUser(user.getId(), updateRequest);
+
+        assertThat(updatedUser.getName()).isEqualTo("Eve Updated");
+        assertThat(updatedUser.getEmail()).isEqualTo("eve.updated@example.com");
+        assertThat(updatedUser.getPhone()).isEqualTo("+987654321");
+    }
+
+    @Test
+    void testChangePassword() {
+        User user = userRepository.save(User.builder()
+                .role(testRole)
+                .name("Frank")
+                .email("frank@example.com")
+                .phone("+111222333")
+                .passwordHash(passwordEncoder.encode("oldpasswordhash"))
+                .balance(new BigDecimal("60.00"))
+                .build());
+
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setCurrentPassword("oldpasswordhash");
+        changePasswordRequest.setNewPassword("newpasswordhash");
+
+        userService.changePassword(user.getId(), changePasswordRequest);
+        User updatedUser = userRepository.findById(user.getId()).orElseThrow();
+
+        assertThat(passwordEncoder.matches("newpasswordhash", updatedUser.getPasswordHash())).isTrue();    }
 
     @Test
     void testDeleteUser() {

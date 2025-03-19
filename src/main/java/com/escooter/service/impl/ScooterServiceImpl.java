@@ -29,6 +29,7 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Transactional
     public ScooterDto addScooter(ScooterDto scooterDto) {
+        log.info("Adding a new scooter");
         Scooter scooter = scooterMapper.toEntity(scooterDto);
         Scooter savedScooter = scooterRepository.save(scooter);
         log.info("Added new scooter with ID: {}", savedScooter.getId());
@@ -37,6 +38,7 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Transactional(readOnly = true)
     public ScooterDto getScooterById(UUID scooterId) {
+        log.info("Fetching scooter with ID: {}", scooterId);
         return scooterRepository.findById(scooterId)
                 .map(scooterMapper::toDto)
                 .orElseThrow(() -> {
@@ -55,6 +57,7 @@ public class ScooterServiceImpl implements ScooterService {
 
     @Transactional
     public ScooterDto updateScooter(UUID scooterId, ScooterDto scooterDto) {
+        log.info("Updating scooter with ID: {}", scooterId);
         if (!scooterRepository.existsById(scooterId)) {
             log.error("Scooter with ID: {} not found", scooterId);
             throw new NoSuchElementException("Scooter with ID: " + scooterId + " not found");
@@ -64,23 +67,25 @@ public class ScooterServiceImpl implements ScooterService {
         updatedScooter.setId(scooterId);
 
         Scooter savedScooter = scooterRepository.save(updatedScooter);
-        log.info("Updated scooter with ID: {}", savedScooter.getId());
+        log.info("Successfully updated scooter with ID: {}", savedScooter.getId());
 
         return scooterMapper.toDto(savedScooter);
     }
 
     @Transactional
     public void deleteScooter(UUID scooterId) {
+        log.info("Attempting to delete scooter with ID: {}", scooterId);
         if (!scooterRepository.existsById(scooterId)) {
             log.error("Scooter with ID: {} not found", scooterId);
             throw new NoSuchElementException("Scooter with ID: " + scooterId + " not found");
         }
         scooterRepository.deleteById(scooterId);
-        log.info("Deleted scooter with ID: {}", scooterId);
+        log.info("Successfully deleted scooter with ID: {}", scooterId);
     }
 
     @Transactional(readOnly = true)
     public PricingPlanDto getPricingPlanByScooterId(UUID scooterId) {
+        log.info("Fetching pricing plan for scooter ID: {}", scooterId);
         Scooter scooter = scooterRepository.findById(scooterId)
                 .orElseThrow(() -> {
                     log.error("Scooter with ID: {} not found", scooterId);
@@ -92,6 +97,7 @@ public class ScooterServiceImpl implements ScooterService {
             throw new NoSuchElementException("Scooter with ID: " + scooterId + " has no pricing plan assigned");
         }
 
+        log.info("Successfully retrieved pricing plan for scooter ID: {}", scooterId);
         return pricingPlanMapper.toDto(scooter.getPricingPlan());
     }
 }

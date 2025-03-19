@@ -25,14 +25,16 @@ public class ModelServiceImpl implements ModelService {
 
     @Transactional
     public ModelDto addModel(ModelDto modelDto) {
+        log.info("Attempting to add a new model: {}", modelDto);
         Model model = modelMapper.toEntity(modelDto);
         Model savedModel = modelRepository.save(model);
-        log.info("Added new model with ID: {}", savedModel.getId());
+        log.info("Successfully added new model with ID: {}", savedModel.getId());
         return modelMapper.toDto(savedModel);
     }
 
     @Transactional(readOnly = true)
     public ModelDto getModelById(Integer id) {
+        log.info("Fetching model with ID: {}", id);
         return modelRepository.findById(id)
                 .map(modelMapper::toDto)
                 .orElseThrow(() -> {
@@ -43,14 +45,17 @@ public class ModelServiceImpl implements ModelService {
 
     @Transactional(readOnly = true)
     public List<ModelDto> getAllModels() {
-        log.info("Fetching all models");
-        return modelRepository.findAll().stream()
+        log.info("Fetching all models from database");
+        List<ModelDto> models = modelRepository.findAll().stream()
                 .map(modelMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Total models fetched: {}", models.size());
+        return models;
     }
 
     @Transactional
     public ModelDto updateModel(Integer id, ModelDto modelDto) {
+        log.info("Attempting to update model with ID: {}", id);
         if (!modelRepository.existsById(id)) {
             log.error("Model with ID: {} not found", id);
             throw new NoSuchElementException("Model with ID: " + id + " not found");
@@ -60,18 +65,18 @@ public class ModelServiceImpl implements ModelService {
         updatedModel.setId(id);
 
         Model savedModel = modelRepository.save(updatedModel);
-        log.info("Updated model with ID: {}", savedModel.getId());
-
+        log.info("Successfully updated model with ID: {}", savedModel.getId());
         return modelMapper.toDto(savedModel);
     }
 
     @Transactional
     public void deleteModel(Integer id) {
+        log.info("Attempting to delete model with ID: {}", id);
         if (!modelRepository.existsById(id)) {
             log.error("Model with ID: {} not found", id);
             throw new NoSuchElementException("Model with ID: " + id + " not found");
         }
         modelRepository.deleteById(id);
-        log.info("Deleted model with ID: {}", id);
+        log.info("Successfully deleted model with ID: {}", id);
     }
 }

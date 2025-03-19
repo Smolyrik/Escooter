@@ -1,8 +1,11 @@
 package com.escooter.service;
 
+import com.escooter.dto.ChangePasswordRequest;
+import com.escooter.dto.PartialUpdateUserRequest;
 import com.escooter.dto.UserDto;
 import com.escooter.entity.Role;
 import com.escooter.entity.User;
+import com.escooter.exception.InvalidPasswordException;
 import com.escooter.mapper.UserMapper;
 import com.escooter.repository.UserRepository;
 import com.escooter.service.impl.UserServiceImpl;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,6 +34,9 @@ class UserServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -144,6 +151,79 @@ class UserServiceImplTest {
         when(userRepository.existsById(userId)).thenReturn(false);
 
         assertThrows(NoSuchElementException.class, () -> userService.updateUser(userId, userDto));
+
+        verify(userRepository, times(0)).save(any());
+    }
+
+    @Test
+    void partialUpdateUser_ShouldUpdateFields_WhenValidRequest() {
+        PartialUpdateUserRequest updateRequest = new PartialUpdateUserRequest();
+        updateRequest.setName("Jane Doe");
+        updateRequest.setEmail("jane.doe@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userMapper.toDto(user)).thenReturn(userDto);
+
+        UserDto result = userService.partialUpdateUser(userId, updateRequest);
+
+        assertNotNull(result);
+        assertEquals("Jane Doe", user.getName());
+        assertEquals("jane.doe@example.com", user.getEmail());
+
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void partialUpdateUser_ShouldThrowException_WhenUserNotFound() {
+        PartialUpdateUserRequest updateRequest = new PartialUpdateUserRequest();
+        updateRequest.setName("Jane Doe");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> userService.partialUpdateUser(userId, updateRequest));
+
+        verify(userRepository, times(0)).save(any());
+    }
+
+    @Test
+    void changePassword_ShouldChangePassword_WhenCurrentPasswordIsCorrect() {
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setNewPassword("newSecurePassword");
+        request.setCurrentPassword("oldPassword");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPassword", user.getPasswordHash())).thenReturn(true);
+        when(passwordEncoder.encode("newSecurePassword")).thenReturn("encodedNewPassword");
+
+        userService.changePassword(userId, request);
+
+        assertEquals("encodedNewPassword", user.getPasswordHash());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void changePassword_ShouldThrowException_WhenUserNotFound() {
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setNewPassword("newSecurePassword");
+        request.setCurrentPassword("oldPassword");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> userService.changePassword(userId, request));
+
+        verify(userRepository, times(0)).save(any());
+    }
+
+    @Test
+    void changePassword_ShouldThrowException_WhenCurrentPasswordIsIncorrect() {
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setNewPassword("newSecurePassword");
+        request.setCurrentPassword("wrongPassword");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", user.getPasswordHash())).thenReturn(false);
+
+        assertThrows(InvalidPasswordException.class, () -> userService.changePassword(userId, request));
 
         verify(userRepository, times(0)).save(any());
     }

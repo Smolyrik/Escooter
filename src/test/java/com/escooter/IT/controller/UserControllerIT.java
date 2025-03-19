@@ -1,5 +1,7 @@
 package com.escooter.IT.controller;
 
+import com.escooter.dto.ChangePasswordRequest;
+import com.escooter.dto.PartialUpdateUserRequest;
 import com.escooter.dto.UserDto;
 import com.escooter.entity.Role;
 import com.escooter.entity.User;
@@ -18,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -49,6 +52,8 @@ class UserControllerIT {
     private String jwtSigningKey;
 
     private Role testRole;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -113,6 +118,46 @@ class UserControllerIT {
 
         assertThat(response).isNotNull();
         assertThat(response.getEmail()).isEqualTo("updated@example.com");
+    }
+
+    @Test
+    void testPartialUpdateUser() {
+        User user = userRepository.save(new User(null, testRole, "Partial Update", "partial@example.com", "+6666666666", "partialpassword", new BigDecimal("500.00")));
+        PartialUpdateUserRequest updateRequest = new PartialUpdateUserRequest();
+        updateRequest.setName("Updated Name");
+        updateRequest.setEmail("updated_partial@example.com");
+        updateRequest.setPhone("+7777777777");
+
+        UserDto response = webClient.patch()
+                .uri("/" + user.getId())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateRequest)
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .block();
+
+        assertThat(response).isNotNull();
+        assertThat(response.getEmail()).isEqualTo("updated_partial@example.com");
+        assertThat(response.getName()).isEqualTo("Updated Name");
+        assertThat(response.getPhone()).isEqualTo("+7777777777");
+    }
+
+    @Test
+    void testChangePassword() {
+        User user = userRepository.save(new User(null, testRole, "Password User", "password@example.com", "+8888888888", passwordEncoder.encode("oldpassword"), new BigDecimal("600.00")));
+        ChangePasswordRequest passwordRequest = new ChangePasswordRequest();
+        passwordRequest.setCurrentPassword("oldpassword");
+        passwordRequest.setNewPassword("newsecurepassword");
+
+        webClient.patch()
+                .uri("/" + user.getId() + "/password")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateTestToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(passwordRequest)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
     }
 
     @Test

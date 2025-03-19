@@ -1,5 +1,7 @@
 package com.escooter.controller;
 
+import com.escooter.dto.ChangePasswordRequest;
+import com.escooter.dto.PartialUpdateUserRequest;
 import com.escooter.dto.UserDto;
 import com.escooter.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,7 +88,7 @@ public class UserController {
 
     @Operation(
             summary = "Update user details",
-            description = "Updates user information. A user can only update their own data unless they have the MANAGER role.",
+            description = "Updates user information. Only users with the MANAGER role can access this.",
             security = @SecurityRequirement(name = "bearerAuth"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully updated user",
@@ -96,12 +98,51 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @PutMapping("/{userId}")
-    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<UserDto> updateUser(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId,
             @Valid @RequestBody UserDto userDto) {
         return ResponseEntity.ok(userService.updateUser(userId, userDto));
+    }
+
+    @Operation(
+            summary = "Partially update user details",
+            description = "Updates specific user fields. A user can only update their own data unless they have the MANAGER role.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully updated user",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "403", description = "Access denied"),
+                    @ApiResponse(responseCode = "404", description = "User not found")
+            })
+    @PatchMapping("/{userId}")
+    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    public ResponseEntity<UserDto> updateUserPartially(
+            @Parameter(description = "User ID")
+            @NotNull(message = "User ID cannot be null") @PathVariable UUID userId,
+            @Valid @RequestBody PartialUpdateUserRequest partialUpdateUserRequest) {
+        return ResponseEntity.ok(userService.partialUpdateUser(userId, partialUpdateUserRequest));
+    }
+
+    @Operation(
+            summary = "Change user password",
+            description = "Allows a user to change their own password unless they have the MANAGER role, in which case they can change any user's password.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Password successfully changed"),
+                    @ApiResponse(responseCode = "403", description = "Access denied"),
+                    @ApiResponse(responseCode = "404", description = "User not found")
+            })
+    @PatchMapping("/{userId}/password")
+    @PreAuthorize("#userId == authentication.name or hasRole('MANAGER')")
+    public ResponseEntity<Void> changePassword(
+            @Parameter(description = "User ID")
+            @PathVariable UUID userId,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(userId, request);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(

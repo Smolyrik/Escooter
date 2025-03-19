@@ -26,16 +26,21 @@ public class ReportServiceImpl implements ReportService {
 
     @Transactional
     public ReportDto addReport(ReportDto reportDto) {
+        log.info("Attempting to add new report: {}", reportDto);
         Report report = reportMapper.toEntity(reportDto);
         Report savedReport = reportRepository.save(report);
-        log.info("Added new report with ID: {}", savedReport.getId());
+        log.info("Successfully added new report with ID: {}", savedReport.getId());
         return reportMapper.toDto(savedReport);
     }
 
     @Transactional(readOnly = true)
     public ReportDto getReport(UUID id) {
+        log.info("Fetching report with ID: {}", id);
         return reportRepository.findById(id)
-                .map(reportMapper::toDto)
+                .map(report -> {
+                    log.info("Successfully fetched report with ID: {}", id);
+                    return reportMapper.toDto(report);
+                })
                 .orElseThrow(() -> {
                     log.error("Report with ID: {} not found", id);
                     return new NoSuchElementException("Report with ID: " + id + " not found");
@@ -45,13 +50,16 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(readOnly = true)
     public List<ReportDto> getReports() {
         log.info("Fetching all reports");
-        return reportRepository.findAll().stream()
+        List<ReportDto> reports = reportRepository.findAll().stream()
                 .map(reportMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Successfully fetched {} reports", reports.size());
+        return reports;
     }
 
     @Transactional
     public ReportDto updateReport(UUID id, ReportDto reportDto) {
+        log.info("Attempting to update report with ID: {}", id);
         if (!reportRepository.existsById(id)) {
             log.error("Report with ID: {} not found", id);
             throw new NoSuchElementException("Report with ID: " + id + " not found");
@@ -61,18 +69,19 @@ public class ReportServiceImpl implements ReportService {
         updatedReport.setId(id);
 
         Report savedReport = reportRepository.save(updatedReport);
-        log.info("Updated report with ID: {}", savedReport.getId());
+        log.info("Successfully updated report with ID: {}", savedReport.getId());
 
         return reportMapper.toDto(savedReport);
     }
 
     @Transactional
     public void deleteReport(UUID id) {
+        log.info("Attempting to delete report with ID: {}", id);
         if (!reportRepository.existsById(id)) {
             log.error("Report with ID: {} not found", id);
             throw new NoSuchElementException("Report with ID: " + id + " not found");
         }
         reportRepository.deleteById(id);
-        log.info("Deleted report with ID: {}", id);
+        log.info("Successfully deleted report with ID: {}", id);
     }
 }

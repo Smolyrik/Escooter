@@ -1,5 +1,7 @@
 package com.escooter.controller;
 
+import com.escooter.dto.ChangePasswordRequest;
+import com.escooter.dto.PartialUpdateUserRequest;
 import com.escooter.dto.UserDto;
 import com.escooter.entity.Role;
 import com.escooter.service.UserService;
@@ -86,6 +88,37 @@ class UserControllerTest {
         assertNotNull(response.getBody());
         assertEquals(userId, response.getBody().getId());
         verify(userService, times(1)).updateUser(eq(userId), any(UserDto.class));
+    }
+
+    @Test
+    void updateUserPartially_ShouldReturnUpdatedUser() {
+        PartialUpdateUserRequest request = new PartialUpdateUserRequest();
+        request.setName("Updated Name");
+        request.setEmail("updated.email@example.com");
+        request.setPhone("+9876543210");
+
+        when(userService.partialUpdateUser(eq(userId), any(PartialUpdateUserRequest.class)))
+                .thenReturn(userDto);
+
+        ResponseEntity<UserDto> response = userController.updateUserPartially(userId, request);
+
+        assertNotNull(response.getBody());
+        assertEquals(userId, response.getBody().getId());
+        verify(userService, times(1)).partialUpdateUser(eq(userId), any(PartialUpdateUserRequest.class));
+    }
+
+    @Test
+    void changePassword_ShouldReturnNoContent() {
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setCurrentPassword("oldPassword");
+        request.setNewPassword("newSecurePassword");
+
+        doNothing().when(userService).changePassword(eq(userId), any(ChangePasswordRequest.class));
+
+        ResponseEntity<Void> response = userController.changePassword(userId, request);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(userService, times(1)).changePassword(eq(userId), any(ChangePasswordRequest.class));
     }
 
     @Test

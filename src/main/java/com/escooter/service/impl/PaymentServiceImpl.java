@@ -35,6 +35,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto makePayment(UUID userId, BigDecimal amount) {
+        log.info("Initiating payment process for user ID: {} with amount: {}", userId, amount);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User with ID: {} not found", userId);
@@ -55,15 +57,18 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         Payment savedPayment = paymentRepository.save(payment);
+        log.info("Payment saved successfully with ID: {}", savedPayment.getId());
+
         user.setBalance(user.getBalance().add(amount));
         userRepository.save(user);
-        log.info("Created new payment with ID: {}", savedPayment.getId());
+        log.info("Updated user balance for user ID: {} to {}", userId, user.getBalance());
 
         return paymentMapper.toDto(savedPayment);
     }
 
     @Override
     public PaymentDto getPaymentById(UUID paymentId) {
+        log.info("Fetching payment details for payment ID: {}", paymentId);
         return paymentRepository.findById(paymentId)
                 .map(paymentMapper::toDto)
                 .orElseThrow(() -> {
@@ -74,8 +79,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PaymentDto> getUserPayments(UUID userId) {
-        List<Payment> payments = paymentRepository.findByUserId(userId);
         log.info("Fetching payments for user with ID: {}", userId);
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+        log.info("Found {} payments for user ID: {}", payments.size(), userId);
         return payments.stream()
                 .map(paymentMapper::toDto)
                 .collect(Collectors.toList());
@@ -83,6 +89,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto updatePaymentStatus(UUID paymentId, PaymentStatusDto status) {
+        log.info("Updating payment status for payment ID: {} to {}", paymentId, status.getName());
+
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> {
                     log.error("Payment with ID: {} not found", paymentId);
@@ -96,9 +104,8 @@ public class PaymentServiceImpl implements PaymentService {
                 });
 
         payment.setStatus(newStatus);
-
         Payment updatedPayment = paymentRepository.save(payment);
-        log.info("Updated payment with ID: {}", updatedPayment.getId());
+        log.info("Updated payment status successfully for payment ID: {} to {}", updatedPayment.getId(), newStatus.getName());
 
         return paymentMapper.toDto(updatedPayment);
     }

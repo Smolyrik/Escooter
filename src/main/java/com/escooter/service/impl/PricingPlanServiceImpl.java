@@ -26,14 +26,16 @@ public class PricingPlanServiceImpl implements PricingPlanService {
 
     @Transactional
     public PricingPlanDto addPricingPlan(PricingPlanDto pricingPlanDto) {
+        log.info("Adding new pricing plan: {}", pricingPlanDto);
         PricingPlan pricingPlan = pricingPlanMapper.toEntity(pricingPlanDto);
         PricingPlan savedPlan = pricingPlanRepository.save(pricingPlan);
-        log.info("Added new pricing plan with ID: {}", savedPlan.getId());
+        log.info("Successfully added pricing plan with ID: {}", savedPlan.getId());
         return pricingPlanMapper.toDto(savedPlan);
     }
 
     @Transactional(readOnly = true)
     public PricingPlanDto getPricingPlan(UUID id) {
+        log.info("Fetching pricing plan with ID: {}", id);
         return pricingPlanRepository.findById(id)
                 .map(pricingPlanMapper::toDto)
                 .orElseThrow(() -> {
@@ -45,13 +47,16 @@ public class PricingPlanServiceImpl implements PricingPlanService {
     @Transactional(readOnly = true)
     public List<PricingPlanDto> getAllPricingPlan() {
         log.info("Fetching all pricing plans");
-        return pricingPlanRepository.findAll().stream()
+        List<PricingPlanDto> pricingPlans = pricingPlanRepository.findAll().stream()
                 .map(pricingPlanMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Successfully fetched {} pricing plans", pricingPlans.size());
+        return pricingPlans;
     }
 
     @Transactional
     public PricingPlanDto updatePricingPlan(UUID id, PricingPlanDto pricingPlanDto) {
+        log.info("Updating pricing plan with ID: {}", id);
         if (!pricingPlanRepository.existsById(id)) {
             log.error("Pricing plan with ID: {} not found", id);
             throw new NoSuchElementException("Pricing plan with ID: " + id + " not found");
@@ -59,20 +64,20 @@ public class PricingPlanServiceImpl implements PricingPlanService {
 
         PricingPlan updatedPlan = pricingPlanMapper.toEntity(pricingPlanDto);
         updatedPlan.setId(id);
-
         PricingPlan savedPlan = pricingPlanRepository.save(updatedPlan);
-        log.info("Updated pricing plan with ID: {}", savedPlan.getId());
+        log.info("Successfully updated pricing plan with ID: {}", savedPlan.getId());
 
         return pricingPlanMapper.toDto(savedPlan);
     }
 
     @Transactional
     public void deletePricingPlan(UUID id) {
+        log.info("Deleting pricing plan with ID: {}", id);
         if (!pricingPlanRepository.existsById(id)) {
             log.error("Pricing plan with ID: {} not found", id);
             throw new NoSuchElementException("Pricing plan with ID: " + id + " not found");
         }
         pricingPlanRepository.deleteById(id);
-        log.info("Deleted pricing plan with ID: {}", id);
+        log.info("Successfully deleted pricing plan with ID: {}", id);
     }
 }
