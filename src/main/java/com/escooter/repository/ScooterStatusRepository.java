@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ScooterStatusRepository extends JpaRepository<ScooterStatus, Integer> {
+
     Optional<ScooterStatus> findByName(String name);
 }

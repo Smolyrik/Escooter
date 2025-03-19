@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentStatusRepository extends JpaRepository<PaymentStatus, Integer> {
+
     Optional<PaymentStatus> findByName(String name);
 }
