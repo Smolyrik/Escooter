@@ -16,6 +16,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -42,6 +43,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RentalPointDto> addRentalPoint(@Valid @RequestBody RentalPointDto rentalPointDto) {
         return ResponseEntity.ok(rentalPointService.addRentalPoint(rentalPointDto));
     }
@@ -56,6 +58,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RentalPointDto> getRentalPointById(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id) {
@@ -72,6 +75,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<RentalPointDto>> getAllRentalPoints() {
         return ResponseEntity.ok(rentalPointService.getAllRentalPoints());
     }
@@ -87,6 +91,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/nearby")
+    @PreAuthorize("hasAnyRole('MANAGER', 'USER')")
     public ResponseEntity<List<RentalPointDto>> getNearbyRentalPoints(
             @Parameter(description = "User latitude")
             @RequestParam @NotNull @DecimalMin(value = "-90.0", message = "Latitude must be >= -90")
@@ -111,6 +116,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RentalPointDto> updateRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id,
@@ -126,6 +132,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Void> deleteRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID id) {
@@ -143,6 +150,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/{rentalPointId}/scooters")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<ScooterDto>> getAllScootersByRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
@@ -159,6 +167,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/{rentalPointId}/scooters/available")
+    @PreAuthorize("hasAnyRole('MANAGER', 'USER')")
     public ResponseEntity<List<ScooterDto>> getAvailableScootersByRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
@@ -175,6 +184,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/{rentalPointId}/scooters/rented")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<ScooterDto>> getRentedScootersByRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {
@@ -191,6 +201,7 @@ public class RentalPointController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/{rentalPointId}/scooters/repair")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<ScooterDto>> getScootersOnRepairByRentalPoint(
             @Parameter(description = "Rental point ID")
             @NotNull(message = "Rental point ID cannot be null") @PathVariable UUID rentalPointId) {

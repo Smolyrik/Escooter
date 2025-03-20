@@ -15,6 +15,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -41,6 +42,7 @@ public class PaymentController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @PostMapping("/make")
+    @PreAuthorize("hasAnyRole('MANAGER', 'USER')")
     public ResponseEntity<PaymentDto> makePayment(
             @Parameter(description = "User ID")
             @RequestParam @NotNull(message = "User ID cannot be null") UUID userId,
@@ -65,6 +67,7 @@ public class PaymentController {
                     @ApiResponse(responseCode = "404", description = "Payment not found")
             })
     @GetMapping("/{paymentId}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<PaymentDto> getPaymentById(
             @Parameter(description = "Payment ID")
             @NotNull(message = "Payment ID cannot be null") @PathVariable UUID paymentId) {
@@ -82,6 +85,7 @@ public class PaymentController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping("/user/{userId}")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<List<PaymentDto>> getUserPayments(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
@@ -101,6 +105,7 @@ public class PaymentController {
                     @ApiResponse(responseCode = "400", description = "Invalid input")
             })
     @PatchMapping("/{paymentId}/status")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<PaymentDto> updatePaymentStatus(
             @Parameter(description = "Payment ID")
             @NotNull(message = "Payment ID cannot be null") @PathVariable UUID paymentId,

@@ -13,6 +13,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class RentalController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @PostMapping("/start")
+    @PreAuthorize("hasAnyRole('MANAGER', 'USER')")
     public ResponseEntity<RentalDto> rentScooter(
             @Parameter(description = "User ID")
             @RequestParam @NotNull(message = "User ID cannot be null") UUID userId,
@@ -64,6 +66,7 @@ public class RentalController {
                     @ApiResponse(responseCode = "403", description = "Access denied")
             })
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<RentalDto>> getAllRentals() {
         return ResponseEntity.ok(rentalService.getAllRentals());
     }
@@ -80,6 +83,7 @@ public class RentalController {
                     @ApiResponse(responseCode = "404", description = "Rental not found")
             })
     @PostMapping("/end")
+    @PreAuthorize("hasAnyRole('MANAGER', 'USER')")
     public ResponseEntity<RentalDto> endRental(
             @Parameter(description = "Rental ID")
             @NotNull(message = "Rental ID cannot be null") @RequestParam UUID rentalId,
@@ -102,6 +106,7 @@ public class RentalController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @GetMapping("/user/{userId}")
+    @PreAuthorize("#userId.toString() == principal.getUserId().toString() or hasRole('ROLE_MANAGER')")
     public ResponseEntity<List<RentalDto>> getRentalsByUserId(
             @Parameter(description = "User ID")
             @NotNull(message = "User ID cannot be null") @PathVariable UUID userId) {
@@ -119,6 +124,7 @@ public class RentalController {
                     @ApiResponse(responseCode = "404", description = "Scooter not found")
             })
     @GetMapping("/scooter/{scooterId}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<RentalDto>> getRentalsByScooterId(
             @Parameter(description = "Scooter ID")
             @NotNull(message = "Scooter ID cannot be null") @PathVariable UUID scooterId) {
