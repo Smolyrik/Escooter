@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0-create-tables
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.0-create-tables.sql
+
+
+  - changeSet:
+      id: 1.1-insert-data
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.1-insert-data.sql
+
+  - changeSet:
+      id: 1.2-change-report-column
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.2-change-report-column.sql
+
+  - changeSet:
+      id: 1.3-register_change
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.3-register_change.sql
+
+  - changeSet:
+      id: 1.4-added-rental-type
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.4-added-rental-type.sql
+
+  - changeSet:
+      id: 1.5-delete-user-balance-check
+      author: Evgeniy Smolenskiy
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/1.5-delete-user-balance-check.sql

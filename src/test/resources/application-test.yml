@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: "escooter-rental"
+
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: postgres
+    password: Password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    root: INFO
+    online_store: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    name: logs/app.log
+
+token:
+  signing:
+    key: 7C2F6A4D9B1E5F3A8D7C4E6B2A1D5F374C8E9A2D6F5B3C7E1A4D9F2B6C8E5
